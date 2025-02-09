@@ -22,7 +22,6 @@ function getStoredMondayDate(): Date {
   if (stored) {
     return new Date(`${stored}T08:00:00.000Z`);
   } else {
-    // fallback if not set in localStorage
     return new Date("2025-02-03T08:00:00.000Z");
   }
 }
@@ -188,31 +187,65 @@ function importData(file: File) {
 /* -------------- CLEAR ALL DATA -------------- */
 function clearAllData() {
   if (confirm("Are you sure you want to DELETE ALL your data?")) {
-    // Remove all scoreboard-related items from localStorage
     localStorage.clear();
-    // Alternatively, you could remove specific keys:
-    // localStorage.removeItem("goals");
-    // localStorage.removeItem("dailyEntries");
-    // localStorage.removeItem("weeklySummaries");
-    // localStorage.removeItem("baseMonday");
-
     alert("All data has been cleared. The page will now refresh.");
     window.location.reload();
   }
 }
 
-/* -------------- REACT COMPONENT -------------- */
+/* -------------- TIME HELPER -------------- */
+/**
+ * Format the current time as:
+ * 12:50 A.M. | March 07 2025
+ *
+ * We'll update this every second via setInterval.
+ */
+function formatTime(date: Date): string {
+  // 1) Hours in 12h format + A.M. / P.M.
+  let hours = date.getHours();
+  const ampm = hours >= 12 ? "P.M." : "A.M.";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  // 2) Minutes and seconds with leading zeros
+  const minutes = date.getMinutes();
+  const secs = date.getSeconds();
+  const mm = minutes < 10 ? `0${minutes}` : minutes;
+  const ss = secs < 10 ? `0${secs}` : secs;
+
+  // 3) e.g. 12:05:09 A.M. or 1:50:22 P.M.
+  const timePart = `${hours}:${mm}:${ss} ${ampm}`;
+
+  // 4) Month name (long), day, year
+  const options: Intl.DateTimeFormatOptions = {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  };
+  const datePart = date.toLocaleDateString("en-US", options);
+  // e.g. "March 07, 2025"
+  // If we don't want the comma, we can remove it by manual formatting
+  // or we can just replace the comma:
+  const datePartNoComma = datePart.replace(",", "");
+
+  // final: "12:50 A.M. | March 07 2025"
+  return `${timePart} | ${datePartNoComma}`;
+}
+
+/* -------------- MAIN COMPONENT -------------- */
 export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [currentWeekNumber, setCurrentWeekNumber] = useState(3);
   const [currentWeekScore, setCurrentWeekScore] = useState<number | null>(null);
-
   const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
   const [dailyEntries, setDailyEntries] = useState<DailyEntry[]>([]);
   const [overallAverage, setOverallAverage] = useState<number>(0);
 
-  // We'll track the user's chosen Monday in local state for the date input
+  // The user-chosen Monday date
   const [chosenMonday, setChosenMonday] = useState<string>("2025-02-03");
+
+  // State + interval for live clock
+  const [currentTime, setCurrentTime] = useState<string>("");
 
   /* On initial load, read from localStorage + build everything. */
   useEffect(() => {
@@ -252,6 +285,19 @@ export default function HomePage() {
     else setOverallAverage(Math.round(totalScore / count));
   }, [allSummaries, dailyEntries]);
 
+  /* Live clock: update every second */
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentTime(formatTime(new Date()));
+    }, 1000);
+
+    // Immediately set the time once on mount
+    setCurrentTime(formatTime(new Date()));
+
+    // Clean up interval
+    return () => clearInterval(intervalId);
+  }, []);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
@@ -278,7 +324,7 @@ export default function HomePage() {
   return (
     <>
       {/* Gradient "Hero" Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center rounded-lg">
+      <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center rounded-t-lg">
         <h1 className="text-5xl font-bold mb-4">The 12-Week Year</h1>
         <p className="max-w-2xl mx-auto text-2xl">
           Gamified Habit and Performance Tracker
@@ -287,10 +333,16 @@ export default function HomePage() {
           Track your goals, daily tasks, and weekly progress in one place.
         </p>
       </div>
+      {/* Current Time & Date Display */}
+      <div className="bg-slate-700 text-center p-4 text-lg font-semibold text-green-400 rounded-b-lg">
+        {/* Example: "12:50 A.M. | March 07 2025" */}
+        {currentTime}
+        <span className="text-sm ml-4">PST (UTC/GMT-8)</span>
+      </div>
 
       {/* Main Content Card */}
-      <div className="max-w-5xl mx-auto -mt-12 pb-8 px-4">
-        <div className="bg-white rounded-lg shadow-lg p-6 space-y-8">
+      <div className="max-w-5xl mx-auto pb-8 px-4 -mt-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 space-y-8 mt-4">
           {/* Monday Picker */}
           <section className="border-b pb-4">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
@@ -403,6 +455,7 @@ export default function HomePage() {
                 />
               </label>
             </div>
+
             <h2 className="text-sm font-semibold text-red-600 mb-2 mt-8">
               <strong>NOTE:</strong> This data is saved on the browser&apos;s
               local storage.
