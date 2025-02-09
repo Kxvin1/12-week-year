@@ -12,18 +12,44 @@ import {
 } from "@/utils/localStorage";
 import { Goal, DailyEntry, WeeklySummary } from "@/utils/types";
 
-// same logic as before...
+/* -------------- DYNAMIC MONDAY STORAGE -------------- */
+function getStoredMondayDate(): Date {
+  const stored =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("baseMonday")
+      : null;
+
+  if (stored) {
+    return new Date(`${stored}T08:00:00.000Z`);
+  } else {
+    // fallback if not set in localStorage
+    return new Date("2025-02-03T08:00:00.000Z");
+  }
+}
+
+function storeMondayDate(isoDateStr: string) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("baseMonday", isoDateStr);
+  }
+}
+
+function getBaseMondayDate(): Date {
+  return getStoredMondayDate();
+}
+
+/* -------------- LOGIC FOR WEEKS & SCORES -------------- */
 function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
   if (dailyEntries.length === 0) return 1;
-  const uniqueDays = new Set(dailyEntries.map((d) => d.date));
+  const uniqueDays = new Set(dailyEntries.map((day) => day.date));
   const countDays = uniqueDays.size;
   const weekNum = Math.floor((countDays - 1) / 7) + 1;
   return weekNum < 1 ? 1 : weekNum;
 }
 
-const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
 function getDateRangeForWeek(weekNumber: number) {
+  const baseMondayDate = getBaseMondayDate();
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+
   const startDate = new Date(
     baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
   );
@@ -61,7 +87,7 @@ function calculateWeeklyScore(dailyEntries: DailyEntry[]): number | null {
     });
   });
   if (count === 0) return null;
-  const average = total / count;
+  const average = total / count; // 0–4
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
 }
@@ -93,6 +119,7 @@ function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
     const entryNum = dateStringToNumber(entry.date);
     return entryNum >= startNum && entryNum <= endNum;
   });
+
   filtered.forEach((entry) => {
     entry.tasks.forEach((task) => {
       switch (task.tier) {
@@ -119,6 +146,7 @@ function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
   return Math.round(percentage);
 }
 
+/* -------------- IMPORT / EXPORT -------------- */
 function exportData() {
   const data = {
     goals: getGoals(),
@@ -157,6 +185,23 @@ function importData(file: File) {
   reader.readAsText(file);
 }
 
+/* -------------- CLEAR ALL DATA -------------- */
+function clearAllData() {
+  if (confirm("Are you sure you want to DELETE ALL your data?")) {
+    // Remove all scoreboard-related items from localStorage
+    localStorage.clear();
+    // Alternatively, you could remove specific keys:
+    // localStorage.removeItem("goals");
+    // localStorage.removeItem("dailyEntries");
+    // localStorage.removeItem("weeklySummaries");
+    // localStorage.removeItem("baseMonday");
+
+    alert("All data has been cleared. The page will now refresh.");
+    window.location.reload();
+  }
+}
+
+/* -------------- REACT COMPONENT -------------- */
 export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [currentWeekNumber, setCurrentWeekNumber] = useState(3);
@@ -166,7 +211,14 @@ export default function HomePage() {
   const [dailyEntries, setDailyEntries] = useState<DailyEntry[]>([]);
   const [overallAverage, setOverallAverage] = useState<number>(0);
 
+  // We'll track the user's chosen Monday in local state for the date input
+  const [chosenMonday, setChosenMonday] = useState<string>("2025-02-03");
+
+  /* On initial load, read from localStorage + build everything. */
   useEffect(() => {
+    const stored = localStorage.getItem("baseMonday");
+    if (stored) setChosenMonday(stored);
+
     setGoals(getGoals());
     const daily = getDailyEntries();
     setDailyEntries(daily);
@@ -183,6 +235,7 @@ export default function HomePage() {
     setCurrentWeekScore(partial);
   }, []);
 
+  /* Recompute overall average each time dailyEntries or allSummaries changes */
   useEffect(() => {
     if (allSummaries.length === 0) {
       setOverallAverage(0);
@@ -206,6 +259,22 @@ export default function HomePage() {
     }
   }
 
+  function handleMondayChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.value; // e.g. "2025-01-06"
+    const day = new Date(`${selected}T00:00:00`).getUTCDay();
+    // Sunday=0, Monday=1, etc.
+
+    if (day !== 1) {
+      alert("Please pick a Monday date!");
+      e.target.value = chosenMonday; // revert
+      return;
+    }
+
+    setChosenMonday(selected);
+    storeMondayDate(selected);
+    window.location.reload();
+  }
+
   return (
     <>
       {/* Gradient "Hero" Section */}
@@ -221,8 +290,24 @@ export default function HomePage() {
 
       {/* Main Content Card */}
       <div className="max-w-5xl mx-auto -mt-12 pb-8 px-4">
-        {/* White card overlay */}
         <div className="bg-white rounded-lg shadow-lg p-6 space-y-8">
+          {/* Monday Picker */}
+          <section className="border-b pb-4">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Choose Your Start Monday
+            </h2>
+            <p className="text-gray-600 text-sm mb-3">
+              This determines Week #1. You can pick any month in the calendar
+              UI, but only Mondays are allowed.
+            </p>
+            <input
+              type="date"
+              value={chosenMonday}
+              onChange={handleMondayChange}
+              className="border p-2 rounded text-gray-800"
+            />
+          </section>
+
           {/* Current Week */}
           <section className="border-b pb-4">
             <h2 className="text-2xl font-semibold text-gray-800">
@@ -237,11 +322,11 @@ export default function HomePage() {
           {/* Goals */}
           <section className="border-b pb-4">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Overarching Goals
+              Long Term 12-Week Goals
             </h2>
             {goals.length === 0 ? (
               <p className="text-gray-600">
-                You haven't added any 12-week goals yet.
+                You haven&apos;t added any 12-week goals yet.
               </p>
             ) : (
               <ol className="list-decimal list-inside text-gray-700 space-y-1">
@@ -296,7 +381,7 @@ export default function HomePage() {
             </p>
           </section>
 
-          {/* Import/Export */}
+          {/* Import/Export + CLEAR DATA */}
           <section className="pt-4">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
               Import / Export Data
@@ -317,6 +402,22 @@ export default function HomePage() {
                   className="border p-1 rounded text-gray-800"
                 />
               </label>
+            </div>
+            <h2 className="text-sm font-semibold text-red-600 mb-2 mt-8">
+              <strong>NOTE:</strong> This data is saved on the browser&apos;s
+              local storage.
+              <br />
+              Your data will persist as long as you don&apos;t clear your
+              browser data.
+            </h2>
+
+            <div className="mt-12 flex justify-center">
+              <button
+                onClick={clearAllData}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+              >
+                CLEAR ALL DATA
+              </button>
             </div>
           </section>
         </div>
