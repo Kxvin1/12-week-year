@@ -20,6 +20,32 @@ function getTodayPST() {
   return laDate.toISOString().split("T")[0]; // YYYY-MM-DD
 }
 
+/**
+ * Map each tier to a Tailwind color or style.
+ * Adjust these to suit your design.
+ */
+function getTierColor(tier: "S" | "A" | "B" | "C", selected: boolean) {
+  // If selected, we use a bolder color. If not selected, a lighter variant.
+  switch (tier) {
+    case "S":
+      return selected
+        ? "bg-green-600 text-white"
+        : "bg-green-200 text-green-800/40";
+    case "A":
+      return selected
+        ? "bg-blue-600 text-white"
+        : "bg-blue-200 text-blue-800/40";
+    case "B":
+      return selected
+        ? "bg-orange-600 text-white"
+        : "bg-orange-200 text-orange-800/40";
+    case "C":
+      return selected ? "bg-red-600 text-white" : "bg-red-200 text-red-800/40";
+    default:
+      return "bg-gray-200 text-gray-800";
+  }
+}
+
 export default function DailyPage() {
   // PST default date
   const [selectedDate, setSelectedDate] = useState(getTodayPST());
@@ -113,6 +139,7 @@ export default function DailyPage() {
 
       {dailyEntry && (
         <div className="max-w-4xl mx-auto">
+          {/* Add Task Input */}
           <div className="flex items-center mb-4 text-gray-800">
             <input
               type="text"
@@ -129,6 +156,7 @@ export default function DailyPage() {
             </button>
           </div>
 
+          {/* Main Table */}
           <table className="w-full border-collapse mb-4">
             <thead>
               <tr className="bg-gray-400 text-gray-800">
@@ -144,22 +172,29 @@ export default function DailyPage() {
                   className="text-center bg-gray-200 text-gray-800"
                 >
                   <td className="border p-2">{task.taskId}</td>
+
+                  {/* Tier Column with "badge" buttons */}
                   <td className="border p-2">
-                    {(["S", "A", "B", "C"] as const).map((tier) => (
-                      <label key={tier} className="mr-2">
-                        <input
-                          type="radio"
-                          name={`tier-${index}`}
-                          value={tier}
-                          checked={task.tier === tier}
-                          onChange={() => handleTierChange(index, tier)}
-                        />
-                        <span className="ml-1">{tier}</span>
-                      </label>
-                    ))}
+                    <div className="flex gap-2 justify-center">
+                      {(["S", "A", "B", "C"] as const).map((tierVal) => {
+                        const isSelected = task.tier === tierVal;
+                        const colorClass = getTierColor(tierVal, isSelected);
+
+                        return (
+                          <button
+                            key={tierVal}
+                            onClick={() => handleTierChange(index, tierVal)}
+                            className={`px-3 py-1 rounded-full text-sm font-semibold ${colorClass} transition-colors duration-200 `}
+                          >
+                            {tierVal}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </td>
+
+                  {/* Notes Column */}
                   <td className="border p-2">
-                    {/* Bigger notes area */}
                     <textarea
                       className="border rounded p-1 w-full"
                       rows={3}
@@ -173,6 +208,7 @@ export default function DailyPage() {
             </tbody>
           </table>
 
+          {/* Save Button */}
           <div className="flex justify-center">
             <button
               onClick={handleSave}
