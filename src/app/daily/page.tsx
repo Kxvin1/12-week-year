@@ -107,8 +107,14 @@ export default function DailyPage() {
       {/* Gradient Hero */}
       <div className="bg-gradient-to-r from-blue-500 to-cyan-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Daily Tasks</h1>
-        <p className="max-w-xl mx-auto">
+        <p className="max-w-xl mx-auto text-xl mb-2">
           Log tasks and assign tiers for each day to track your progress.
+        </p>
+        <p className="max-w-xl mx-auto mb-2">
+          Task Names will transfer over to the following day until edits are
+          made to a task.
+          <br />
+          Tier Rankings and Notes are reset each day.
         </p>
       </div>
 

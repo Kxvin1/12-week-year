@@ -136,7 +136,7 @@ export default function WeeklySummaryPage() {
       <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Weekly Summary</h1>
         <p className="max-w-xl mx-auto">
-          Check your weekly score and reflection, and see past weeks below.
+          Check your weekly score, reflection notes and past weeks below.
         </p>
       </div>
 
@@ -189,7 +189,7 @@ export default function WeeklySummaryPage() {
                 <div className="bg-gray-200 p-3 rounded min-h-[80px]">
                   {reflection
                     ? reflection
-                    : "No reflection yet. Click 'Edit Reflection' to add one."}
+                    : "No reflection yet. Click 'Edit Reflection' to add notes for this week."}
                 </div>
               </>
             )}
