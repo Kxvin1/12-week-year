@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  getDailyEntries,
-  saveDailyEntry,
-  DailyEntry,
-} from "@/utils/localStorage";
+import { getDailyEntries, saveDailyEntry } from "@/utils/localStorage";
+import { DailyEntry } from "@/utils/types";
 
 // Helper to increment/decrement a date string
 function shiftDate(dateStr: string, days: number) {
@@ -120,13 +117,13 @@ export default function DailyPage() {
             <input
               type="text"
               placeholder="New Task Name"
-              className="border p-2 mr-2 w-full rounded text-gray-800"
+              className="border p-2 mr-2 w-10/12 rounded text-gray-800"
               value={newTaskName}
               onChange={(e) => setNewTaskName(e.target.value)}
             />
             <button
               onClick={handleAddTask}
-              className="bg-green-600 text-white px-8 py-2 rounded-full"
+              className="bg-green-600 text-white px-4 py-3 rounded"
             >
               Add Task
             </button>
