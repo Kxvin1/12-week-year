@@ -14,10 +14,18 @@ function shiftDate(dateStr: string, days: number) {
   return dateObj.toISOString().split("T")[0];
 }
 
+/** Get today's date in PST (naive approach). */
+function getTodayPST() {
+  const laString = new Date().toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+  });
+  const laDate = new Date(laString);
+  return laDate.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
 export default function DailyPage() {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  // PST default date instead of the system UTC date
+  const [selectedDate, setSelectedDate] = useState(getTodayPST());
   const [dailyEntry, setDailyEntry] = useState<DailyEntry | null>(null);
 
   // New task input

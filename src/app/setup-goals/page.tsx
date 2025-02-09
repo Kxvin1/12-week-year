@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, KeyboardEvent } from "react";
 import { getGoals, saveGoals } from "@/utils/localStorage";
 import { Goal } from "@/utils/types";
 import { v4 as uuidv4 } from "uuid";
@@ -20,7 +20,7 @@ export default function SetupGoalsPage() {
   }, []);
 
   function handleAddGoal() {
-    if (!title) return; // at least need a title
+    if (!title) return; // must have at least a title
     const newGoals = [
       ...goals,
       { id: uuidv4(), title: title.trim(), description: description.trim() },
@@ -63,6 +63,13 @@ export default function SetupGoalsPage() {
     setEditDescription("");
   }
 
+  // NEW: Press Enter in either field -> handleAddGoal()
+  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleAddGoal();
+    }
+  }
+
   return (
     <div className="py-4">
       <h1 className="text-3xl font-bold mb-6">Setup Goals</h1>
@@ -76,6 +83,7 @@ export default function SetupGoalsPage() {
             className="border p-2 flex-1 rounded text-gray-800"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <input
             type="text"
@@ -83,6 +91,7 @@ export default function SetupGoalsPage() {
             className="border p-2 flex-1 rounded text-gray-800"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <button
             onClick={handleAddGoal}
@@ -102,7 +111,6 @@ export default function SetupGoalsPage() {
           >
             {editingId === g.id ? (
               <>
-                {/* Edit form */}
                 <div className="flex flex-col sm:flex-row gap-2 mb-2 text-gray-800">
                   <input
                     type="text"
