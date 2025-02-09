@@ -29,9 +29,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/weekly-summary" className="hover:underline">
               Weekly Summary
             </Link>
-            <Link href="/overview" className="hover:underline">
-              Overview
-            </Link>
           </nav>
         </header>
 

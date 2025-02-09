@@ -14,7 +14,7 @@ function shiftDate(dateStr: string, days: number) {
   return dateObj.toISOString().split("T")[0];
 }
 
-/** Get today's date in PST (naive approach). */
+/** Get today's date in PST (naive approach) */
 function getTodayPST() {
   const laString = new Date().toLocaleString("en-US", {
     timeZone: "America/Los_Angeles",
@@ -24,7 +24,7 @@ function getTodayPST() {
 }
 
 export default function DailyPage() {
-  // PST default date instead of the system UTC date
+  // PST default date
   const [selectedDate, setSelectedDate] = useState(getTodayPST());
   const [dailyEntry, setDailyEntry] = useState<DailyEntry | null>(null);
 
@@ -115,7 +115,7 @@ export default function DailyPage() {
       </div>
 
       {dailyEntry && (
-        <div>
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-center mb-4 text-gray-800">
             <input
               type="text"
@@ -162,9 +162,10 @@ export default function DailyPage() {
                     ))}
                   </td>
                   <td className="border p-2">
-                    <input
-                      type="text"
+                    {/* Bigger notes area */}
+                    <textarea
                       className="border rounded p-1 w-full"
+                      rows={3}
                       value={task.notes}
                       placeholder="Notes..."
                       onChange={(e) => handleNotesChange(index, e.target.value)}

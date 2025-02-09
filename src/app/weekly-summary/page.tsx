@@ -8,7 +8,7 @@ import {
 } from "@/utils/localStorage";
 import { WeeklySummary, DailyEntry } from "@/utils/types";
 
-// Same base Monday reference as the rest of the app:
+// Base Monday date for week #1
 const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
 
 function getDateRangeForWeek(weekNumber: number) {
@@ -27,10 +27,21 @@ function dateStringToNumber(dateStr: string) {
   return parseInt(dateStr.replace(/-/g, ""), 10);
 }
 
-function calculateWeeklyScore(dailyEntries: DailyEntry[]) {
+function calculateWeekScore(weekNumber: number, allDaily: DailyEntry[]) {
+  // Filter daily entries for the chosen weekNumber
+  const { start, end } = getDateRangeForWeek(weekNumber);
+  const startNum = dateStringToNumber(start);
+  const endNum = dateStringToNumber(end);
+
   let total = 0;
   let count = 0;
-  dailyEntries.forEach((entry) => {
+
+  const filtered = allDaily.filter((entry) => {
+    const entryNum = dateStringToNumber(entry.date);
+    return entryNum >= startNum && entryNum <= endNum;
+  });
+
+  filtered.forEach((entry) => {
     entry.tasks.forEach((task) => {
       switch (task.tier) {
         case "S":
@@ -49,7 +60,8 @@ function calculateWeeklyScore(dailyEntries: DailyEntry[]) {
       count++;
     });
   });
-  if (count === 0) return 0;
+
+  if (count === 0) return 0; // no tasks => 0
   const average = total / count;
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
@@ -61,31 +73,33 @@ export default function WeeklySummaryPage() {
   const [reflection, setReflection] = useState("");
   const [reflectionEditMode, setReflectionEditMode] = useState(false);
 
-  // If there's an existing summary in localStorage
   const [existingSummary, setExistingSummary] = useState<WeeklySummary | null>(
     null
   );
 
+  // We'll also track all daily entries for dynamic score
+  const [allDaily, setAllDaily] = useState<DailyEntry[]>([]);
+  const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
+
   useEffect(() => {
-    // Recompute whenever weekNumber changes
-    const dailyEntries = getDailyEntries();
+    const daily = getDailyEntries();
+    setAllDaily(daily);
 
-    // Filter daily entries for the chosen week
-    const { start, end } = getDateRangeForWeek(weekNumber);
-    const startNum = dateStringToNumber(start);
-    const endNum = dateStringToNumber(end);
+    const summ = getWeeklySummaries().sort(
+      (a, b) => a.weekNumber - b.weekNumber
+    );
+    setAllSummaries(summ);
+  }, []);
 
-    const filtered = dailyEntries.filter((entry) => {
-      const entryNum = dateStringToNumber(entry.date);
-      return entryNum >= startNum && entryNum <= endNum;
-    });
+  // Whenever weekNumber changes or data changes, recalc
+  useEffect(() => {
+    if (allDaily.length === 0 && allSummaries.length === 0) return;
 
-    const computed = calculateWeeklyScore(filtered);
+    const computed = calculateWeekScore(weekNumber, allDaily);
     setScore(computed);
 
-    // See if we already have a WeeklySummary for this week
-    const summaries = getWeeklySummaries();
-    const found = summaries.find((s) => s.weekNumber === weekNumber);
+    // see if there's an existing summary with reflection
+    const found = allSummaries.find((s) => s.weekNumber === weekNumber);
     if (found) {
       setExistingSummary(found);
       setReflection(found.reflection || "");
@@ -94,7 +108,7 @@ export default function WeeklySummaryPage() {
       setReflection("");
     }
     setReflectionEditMode(false);
-  }, [weekNumber]);
+  }, [weekNumber, allDaily, allSummaries]);
 
   function handleSave() {
     // Save reflection + computed score
@@ -104,6 +118,17 @@ export default function WeeklySummaryPage() {
       reflection,
     };
     saveWeeklySummary(newSummary);
+
+    // Update local copy
+    const updated = [...allSummaries];
+    const idx = updated.findIndex((s) => s.weekNumber === weekNumber);
+    if (idx >= 0) updated[idx] = newSummary;
+    else updated.push(newSummary);
+
+    // re-sort
+    updated.sort((a, b) => a.weekNumber - b.weekNumber);
+    setAllSummaries(updated);
+
     setExistingSummary(newSummary);
     setReflectionEditMode(false);
     alert("Weekly summary saved!");
@@ -142,7 +167,7 @@ export default function WeeklySummaryPage() {
       <div className="max-w-2xl mx-auto text-gray-800 mb-6">
         {reflectionEditMode ? (
           <>
-            <label className="font-semibold mb-2 block">
+            <label className="font-semibold mb-2 block text-green-800">
               Reflection (Editing):
             </label>
             <textarea
@@ -155,7 +180,7 @@ export default function WeeklySummaryPage() {
         ) : (
           <>
             <label className="font-semibold mb-2 block text-white">
-              Reflection (Read-Only Mode):
+              Reflection (Read-Only):
             </label>
             <div className="bg-gray-200 p-3 rounded min-h-[80px]">
               {reflection
@@ -189,6 +214,46 @@ export default function WeeklySummaryPage() {
           Loaded existing summary for Week #{existingSummary.weekNumber}.
         </p>
       )}
+
+      {/* Table of all completed weeks - dynamic scoring & reflections */}
+      <div className="mt-8 max-w-3xl mx-auto">
+        <h2 className="text-xl font-semibold mb-2 text-center">
+          Previously Completed Weeks
+        </h2>
+        {allSummaries.length === 0 ? (
+          <p className="text-center">No weekly summaries yet.</p>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-300 text-gray-800">
+                <th className="border p-2">Week #</th>
+                <th className="border p-2">Score (%)</th>
+                <th className="border p-2">Reflection</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allSummaries.map((ws) => {
+                const dynamicScore = calculateWeekScore(
+                  ws.weekNumber,
+                  allDaily
+                );
+                return (
+                  <tr
+                    key={ws.weekNumber}
+                    className="bg-gray-100 text-center text-gray-800"
+                  >
+                    <td className="border p-2">{ws.weekNumber}</td>
+                    <td className="border p-2">{dynamicScore}%</td>
+                    <td className="border p-2 text-left">
+                      {ws.reflection || "No reflection"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
