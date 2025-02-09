@@ -27,8 +27,8 @@ function dateStringToNumber(dateStr: string) {
   return parseInt(dateStr.replace(/-/g, ""), 10);
 }
 
+/** Compute a dynamic score for a given weekNumber. */
 function calculateWeekScore(weekNumber: number, allDaily: DailyEntry[]) {
-  // Filter daily entries for the chosen weekNumber
   const { start, end } = getDateRangeForWeek(weekNumber);
   const startNum = dateStringToNumber(start);
   const endNum = dateStringToNumber(end);
@@ -61,7 +61,7 @@ function calculateWeekScore(weekNumber: number, allDaily: DailyEntry[]) {
     });
   });
 
-  if (count === 0) return 0; // no tasks => 0
+  if (count === 0) return 0;
   const average = total / count;
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
@@ -77,7 +77,7 @@ export default function WeeklySummaryPage() {
     null
   );
 
-  // We'll also track all daily entries for dynamic score
+  // We'll track all daily entries for dynamic score
   const [allDaily, setAllDaily] = useState<DailyEntry[]>([]);
   const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
 
@@ -91,14 +91,13 @@ export default function WeeklySummaryPage() {
     setAllSummaries(summ);
   }, []);
 
-  // Whenever weekNumber changes or data changes, recalc
+  // Recalc whenever weekNumber changes or data changes
   useEffect(() => {
     if (allDaily.length === 0 && allSummaries.length === 0) return;
 
     const computed = calculateWeekScore(weekNumber, allDaily);
     setScore(computed);
 
-    // see if there's an existing summary with reflection
     const found = allSummaries.find((s) => s.weekNumber === weekNumber);
     if (found) {
       setExistingSummary(found);
@@ -111,7 +110,6 @@ export default function WeeklySummaryPage() {
   }, [weekNumber, allDaily, allSummaries]);
 
   function handleSave() {
-    // Save reflection + computed score
     const newSummary: WeeklySummary = {
       weekNumber,
       score,
@@ -119,13 +117,11 @@ export default function WeeklySummaryPage() {
     };
     saveWeeklySummary(newSummary);
 
-    // Update local copy
     const updated = [...allSummaries];
     const idx = updated.findIndex((s) => s.weekNumber === weekNumber);
     if (idx >= 0) updated[idx] = newSummary;
     else updated.push(newSummary);
 
-    // re-sort
     updated.sort((a, b) => a.weekNumber - b.weekNumber);
     setAllSummaries(updated);
 
@@ -135,125 +131,137 @@ export default function WeeklySummaryPage() {
   }
 
   return (
-    <div className="py-4">
-      <h1 className="text-3xl font-bold mb-6 flex justify-center">
-        Weekly Summary
-      </h1>
-
-      <div className="flex items-center gap-4 mb-6 justify-center">
-        <label className="font-semibold">
-          Select Week:{" "}
-          <select
-            value={weekNumber}
-            onChange={(e) => setWeekNumber(parseInt(e.target.value, 10))}
-            className="border p-2 rounded ml-2 text-gray-800"
-          >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-              <option key={num} value={num}>
-                Week {num}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="flex justify-center mb-4">
-        <p className="text-xl">
-          Computed Score for Week #{weekNumber}: <strong>{score}%</strong>
+    <>
+      {/* Gradient Hero */}
+      <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white">
+        <h1 className="text-4xl font-bold mb-2">Weekly Summary</h1>
+        <p className="max-w-xl mx-auto">
+          Check your weekly score and reflection, and see past weeks below.
         </p>
       </div>
 
-      {/* Reflection Section */}
-      <div className="max-w-2xl mx-auto text-gray-800 mb-6">
-        {reflectionEditMode ? (
-          <>
-            <label className="font-semibold mb-2 block text-green-800">
-              Reflection (Editing):
+      {/* White card */}
+      <div className="max-w-5xl mx-auto -mt-10 pb-8 px-4">
+        <div className="bg-white rounded-lg shadow p-6">
+          {/* Week Selector */}
+          <div className="flex items-center gap-4 mb-6 justify-center">
+            <label className="font-semibold text-gray-700">
+              Select Week:{" "}
+              <select
+                value={weekNumber}
+                onChange={(e) => setWeekNumber(parseInt(e.target.value, 10))}
+                className="border p-2 rounded ml-2 text-gray-800"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num}>
+                    Week {num}
+                  </option>
+                ))}
+              </select>
             </label>
-            <textarea
-              className="border p-2 w-full rounded"
-              rows={4}
-              value={reflection}
-              onChange={(e) => setReflection(e.target.value)}
-            />
-          </>
-        ) : (
-          <>
-            <label className="font-semibold mb-2 block text-white">
-              Reflection (Read-Only):
-            </label>
-            <div className="bg-gray-200 p-3 rounded min-h-[80px]">
-              {reflection
-                ? reflection
-                : "No reflection yet. Click 'Edit Reflection' to add one."}
-            </div>
-          </>
-        )}
-      </div>
+          </div>
 
-      <div className="flex justify-center gap-4">
-        {reflectionEditMode ? (
-          <button
-            onClick={handleSave}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Save Weekly Summary
-          </button>
-        ) : (
-          <button
-            onClick={() => setReflectionEditMode(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Edit Reflection
-          </button>
-        )}
-      </div>
+          <div className="flex justify-center mb-4">
+            <p className="text-xl text-gray-800">
+              Computed Score for Week #{weekNumber}: <strong>{score}%</strong>
+            </p>
+          </div>
 
-      {existingSummary && !reflectionEditMode && (
-        <p className="mt-4 text-green-600 text-center">
-          Loaded existing summary for Week #{existingSummary.weekNumber}.
-        </p>
-      )}
+          {/* Reflection Section */}
+          <div className="max-w-2xl mx-auto text-gray-800 mb-6">
+            {reflectionEditMode ? (
+              <>
+                <label className="font-semibold mb-2 block text-green-800">
+                  Reflection (Editing):
+                </label>
+                <textarea
+                  className="border p-2 w-full rounded"
+                  rows={4}
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                />
+              </>
+            ) : (
+              <>
+                <label className="font-semibold mb-2 block text-gray-700">
+                  Reflection (Read-Only):
+                </label>
+                <div className="bg-gray-200 p-3 rounded min-h-[80px]">
+                  {reflection
+                    ? reflection
+                    : "No reflection yet. Click 'Edit Reflection' to add one."}
+                </div>
+              </>
+            )}
+          </div>
 
-      {/* Table of all completed weeks - dynamic scoring & reflections */}
-      <div className="mt-8 max-w-3xl mx-auto">
-        <h2 className="text-xl font-semibold mb-2 text-center">
-          Previously Completed Weeks
-        </h2>
-        {allSummaries.length === 0 ? (
-          <p className="text-center">No weekly summaries yet.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-300 text-gray-800">
-                <th className="border p-2">Week #</th>
-                <th className="border p-2">Score (%)</th>
-                <th className="border p-2">Reflection</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allSummaries.map((ws) => {
-                const dynamicScore = calculateWeekScore(
-                  ws.weekNumber,
-                  allDaily
-                );
-                return (
-                  <tr
-                    key={ws.weekNumber}
-                    className="bg-gray-100 text-center text-gray-800"
-                  >
-                    <td className="border p-2">{ws.weekNumber}</td>
-                    <td className="border p-2">{dynamicScore}%</td>
-                    <td className="border p-2 text-left">
-                      {ws.reflection || "No reflection"}
-                    </td>
+          <div className="flex justify-center gap-4">
+            {reflectionEditMode ? (
+              <button
+                onClick={handleSave}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Save Weekly Summary
+              </button>
+            ) : (
+              <button
+                onClick={() => setReflectionEditMode(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Edit Reflection
+              </button>
+            )}
+          </div>
+
+          {existingSummary && !reflectionEditMode && (
+            <p className="mt-4 text-green-600 text-center">
+              Loaded existing summary for Week #{existingSummary.weekNumber}.
+            </p>
+          )}
+
+          {/* Table of all completed weeks */}
+          <div className="mt-8 max-w-3xl mx-auto">
+            <h2 className="text-xl font-semibold mb-2 text-center text-gray-800">
+              Previously Completed Weeks
+            </h2>
+            {allSummaries.length === 0 ? (
+              <p className="text-center text-gray-600">
+                No weekly summaries yet.
+              </p>
+            ) : (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-300 text-gray-800">
+                    <th className="border p-2">Week #</th>
+                    <th className="border p-2">Score (%)</th>
+                    <th className="border p-2">Reflection</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+                </thead>
+                <tbody>
+                  {allSummaries.map((ws) => {
+                    const dynamicScore = calculateWeekScore(
+                      ws.weekNumber,
+                      allDaily
+                    );
+                    return (
+                      <tr
+                        key={ws.weekNumber}
+                        className="bg-gray-100 text-center text-gray-800"
+                      >
+                        <td className="border p-2">{ws.weekNumber}</td>
+                        <td className="border p-2">{dynamicScore}%</td>
+                        <td className="border p-2 text-left">
+                          {ws.reflection || "No reflection"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

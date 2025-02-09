@@ -5,8 +5,8 @@ import { ReactNode } from "react";
 
 // You can set some metadata if you want, or omit this entirely
 export const metadata: Metadata = {
-  title: "12-Week Scoreboard",
-  description: "Track your daily tasks and weekly progress!",
+  title: "The 12-Week Year",
+  description: "Gamified Habit and Performance Tracker",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Setup Goals
             </Link>
             <Link href="/daily" className="hover:underline">
-              Daily View
+              Daily Summary
             </Link>
             <Link href="/weekly-summary" className="hover:underline">
               Weekly Summary

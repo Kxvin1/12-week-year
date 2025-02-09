@@ -12,9 +12,7 @@ import {
 } from "@/utils/localStorage";
 import { Goal, DailyEntry, WeeklySummary } from "@/utils/types";
 
-/**
- * Determine the current week number based on total unique days
- */
+// same logic as before...
 function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
   if (dailyEntries.length === 0) return 1;
   const uniqueDays = new Set(dailyEntries.map((d) => d.date));
@@ -23,10 +21,6 @@ function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
   return weekNum < 1 ? 1 : weekNum;
 }
 
-/**
- * For partial score, we define a base Monday date and
- * compute the daily tasks for that current 7-day window.
- */
 const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
 function getDateRangeForWeek(weekNumber: number) {
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
@@ -67,14 +61,11 @@ function calculateWeeklyScore(dailyEntries: DailyEntry[]): number | null {
     });
   });
   if (count === 0) return null;
-  const average = total / count; // 0-4
+  const average = total / count;
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
 }
 
-/**
- * Compute a partial score for the "current" week
- */
 function computeCurrentWeekScore(
   dailyEntries: DailyEntry[],
   currentWeekNumber: number
@@ -91,9 +82,6 @@ function computeCurrentWeekScore(
   return calculateWeeklyScore(filtered);
 }
 
-/**
- * For the table, compute dynamic week scores for each saved WeeklySummary
- */
 function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
   const { start, end } = getDateRangeForWeek(weekNumber);
   const startNum = dateStringToNumber(start);
@@ -101,12 +89,10 @@ function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
 
   let total = 0;
   let count = 0;
-
   const filtered = allDaily.filter((entry) => {
     const entryNum = dateStringToNumber(entry.date);
     return entryNum >= startNum && entryNum <= endNum;
   });
-
   filtered.forEach((entry) => {
     entry.tasks.forEach((task) => {
       switch (task.tier) {
@@ -128,12 +114,11 @@ function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
   });
 
   if (count === 0) return 0;
-  const average = total / count; // 0–4
+  const average = total / count;
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
 }
 
-/** Export/Import logic from the old Overview. */
 function exportData() {
   const data = {
     goals: getGoals(),
@@ -177,35 +162,27 @@ export default function HomePage() {
   const [currentWeekNumber, setCurrentWeekNumber] = useState(3);
   const [currentWeekScore, setCurrentWeekScore] = useState<number | null>(null);
 
-  // For the "merged overview" table & average
   const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
   const [dailyEntries, setDailyEntries] = useState<DailyEntry[]>([]);
   const [overallAverage, setOverallAverage] = useState<number>(0);
 
   useEffect(() => {
-    // Load goals
     setGoals(getGoals());
-
-    // Load daily
     const daily = getDailyEntries();
     setDailyEntries(daily);
 
-    // Weekly Summaries
     const summaries = getWeeklySummaries().sort(
       (a, b) => a.weekNumber - b.weekNumber
     );
     setAllSummaries(summaries);
 
-    // Which week are we on?
     const week = determineCurrentWeekNumber(daily);
     setCurrentWeekNumber(week);
 
-    // partial
     const partial = computeCurrentWeekScore(daily, week);
     setCurrentWeekScore(partial);
   }, []);
 
-  // Recompute overall average each time dailyEntries or allSummaries change
   useEffect(() => {
     if (allSummaries.length === 0) {
       setOverallAverage(0);
@@ -230,93 +207,120 @@ export default function HomePage() {
   }
 
   return (
-    <div className="py-4">
-      <h1 className="text-3xl font-bold mb-6">12-Week Scoreboard</h1>
-
-      {/* Current Week + Partial Score */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold">
-          Current Week: #{currentWeekNumber} | Score So Far:{" "}
-          {currentWeekScore !== null
-            ? `${currentWeekScore}%`
-            : "N/A - complete a week to see score."}
-        </h2>
-      </section>
-
-      {/* Overarching Goals */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">
-          Overarching Goals (12 Week Goals)
-        </h2>
-        <ol className="list-decimal list-inside">
-          {goals.map((goal) => (
-            <li key={goal.id} className="mb-1">
-              {goal.title}
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Combined Overview Table + Overall Average */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">All Weeks Overview</h2>
-        {allSummaries.length === 0 ? (
-          <p>No weekly summaries found yet.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-200 text-gray-800">
-                <th className="border p-2">Week #</th>
-                <th className="border p-2">Score (%)</th>
-                <th className="border p-2">Reflection</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allSummaries.map((summary) => {
-                const dynamicScore = computeWeekScore(
-                  summary.weekNumber,
-                  dailyEntries
-                );
-                return (
-                  <tr key={summary.weekNumber}>
-                    <td className="border p-2 text-center">
-                      {summary.weekNumber}
-                    </td>
-                    <td className="border p-2 text-center">{dynamicScore}</td>
-                    <td className="border p-2">{summary.reflection}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-
-        <p className="mt-4">
-          <strong>Overall Average Score:</strong> {overallAverage}%
+    <>
+      {/* Gradient "Hero" Section */}
+      <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center">
+        <h1 className="text-5xl font-bold mb-4">The 12-Week Year</h1>
+        <p className="max-w-2xl mx-auto text-2xl">
+          Gamified Habit and Performance Tracker
         </p>
-      </section>
+        <p className="max-w-2xl mx-auto text-sm">
+          Track your goals, daily tasks, and weekly progress in one place.
+        </p>
+      </div>
 
-      {/* Import/Export */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Import / Export Data</h2>
-        <div className="mt-2 flex items-center gap-4">
-          <button
-            onClick={exportData}
-            className="bg-blue-600 text-white px-4 py-2"
-          >
-            Export Data
-          </button>
-          <label className="block">
-            Import Data:
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleFileChange}
-              className="ml-2"
-            />
-          </label>
+      {/* Main Content Card */}
+      <div className="max-w-5xl mx-auto -mt-12 pb-8 px-4">
+        {/* White card overlay */}
+        <div className="bg-white rounded-lg shadow-lg p-6 space-y-8">
+          {/* Current Week */}
+          <section className="border-b pb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Current Week: #{currentWeekNumber}
+            </h2>
+            <p className="text-gray-700 mt-2">
+              Score So Far:{" "}
+              {currentWeekScore !== null ? `${currentWeekScore}%` : "N/A"}
+            </p>
+          </section>
+
+          {/* Goals */}
+          <section className="border-b pb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              Overarching Goals
+            </h2>
+            {goals.length === 0 ? (
+              <p className="text-gray-600">
+                You haven't added any 12-week goals yet.
+              </p>
+            ) : (
+              <ol className="list-decimal list-inside text-gray-700 space-y-1">
+                {goals.map((goal) => (
+                  <li key={goal.id}>{goal.title}</li>
+                ))}
+              </ol>
+            )}
+          </section>
+
+          {/* All Weeks Overview */}
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              All Weeks Overview
+            </h2>
+            {allSummaries.length === 0 ? (
+              <p className="text-gray-600">No weekly summaries found yet.</p>
+            ) : (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-800">
+                    <th className="border p-2">Week #</th>
+                    <th className="border p-2">Score (%)</th>
+                    <th className="border p-2">Reflection</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allSummaries.map((summary) => {
+                    const dynamicScore = computeWeekScore(
+                      summary.weekNumber,
+                      dailyEntries
+                    );
+                    return (
+                      <tr key={summary.weekNumber}>
+                        <td className="border p-2 text-center text-gray-800">
+                          {summary.weekNumber}
+                        </td>
+                        <td className="border p-2 text-center text-gray-800">
+                          {dynamicScore}
+                        </td>
+                        <td className="border p-2 text-gray-800">
+                          {summary.reflection}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+            <p className="mt-4 text-gray-700">
+              <strong>Overall Average Score:</strong> {overallAverage}%
+            </p>
+          </section>
+
+          {/* Import/Export */}
+          <section className="pt-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              Import / Export Data
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={exportData}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Export Data
+              </button>
+              <label className="flex items-center gap-2 text-gray-700">
+                Import File:
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  className="border p-1 rounded text-gray-800"
+                />
+              </label>
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }
