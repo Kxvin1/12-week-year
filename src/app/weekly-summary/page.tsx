@@ -1,3 +1,4 @@
+// ----- FILE: src/app/weekly-summary/page.tsx -----
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,9 +9,8 @@ import {
 } from "@/utils/localStorage";
 import { WeeklySummary, DailyEntry } from "@/utils/types";
 
-// Always start at Monday 2025-02-03, 00:00
+// We'll keep your base Monday date logic from before, or adjust as needed
 const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
-// Note: "T08:00:00Z" is roughly midnight PST, but real PST handling would need a more robust approach.
 
 function getDateRangeForWeek(weekNumber: number) {
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
@@ -65,8 +65,6 @@ export default function WeeklySummaryPage() {
   const [existingSummary, setExistingSummary] = useState<WeeklySummary | null>(
     null
   );
-
-  // This controls whether reflection is read-only or editable
   const [reflectionEditMode, setReflectionEditMode] = useState(false);
 
   useEffect(() => {
@@ -93,7 +91,7 @@ export default function WeeklySummaryPage() {
       setExistingSummary(null);
       setReflection("");
     }
-    setReflectionEditMode(false); // reset edit mode if week changes
+    setReflectionEditMode(false);
   }, [weekNumber]);
 
   function handleSave() {
@@ -109,7 +107,7 @@ export default function WeeklySummaryPage() {
   }
 
   return (
-    <main className="bg-[var(--background)] text-[var(--foreground)] min-h-screen p-4">
+    <div className="py-4">
       <h1 className="text-3xl font-bold mb-6">Weekly Summary</h1>
 
       <div className="mb-4 flex items-center gap-2">
@@ -117,7 +115,7 @@ export default function WeeklySummaryPage() {
         <select
           value={weekNumber}
           onChange={(e) => setWeekNumber(parseInt(e.target.value, 10))}
-          className="border p-2 rounded"
+          className="border p-2 rounded text-gray-800"
         >
           {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
             <option key={num} value={num}>
@@ -138,7 +136,7 @@ export default function WeeklySummaryPage() {
             Reflection (Editing):
           </label>
           <textarea
-            className="border p-2 w-full rounded"
+            className="border p-2 w-full rounded text-gray-800"
             rows={5}
             value={reflection}
             onChange={(e) => setReflection(e.target.value)}
@@ -147,7 +145,7 @@ export default function WeeklySummaryPage() {
       ) : (
         <div className="mb-4">
           <label className="block mb-2 font-semibold">Reflection:</label>
-          <div className="border p-2 w-full bg-gray-100 rounded min-h-[100px]">
+          <div className="border p-2 w-full bg-gray-100 rounded min-h-[100px] text-gray-800">
             {reflection
               ? reflection
               : "No reflection yet. Click 'Edit Reflection' to add one."}
@@ -179,6 +177,6 @@ export default function WeeklySummaryPage() {
           Loaded existing summary for Week #{existingSummary.weekNumber}.
         </p>
       )}
-    </main>
+    </div>
   );
 }

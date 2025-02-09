@@ -1,5 +1,4 @@
-// ----- FILE: src/app/layout.tsx -----
-import "./globals.css"; // Assuming this is your Tailwind/global setup
+import "./globals.css";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ReactNode } from "react";

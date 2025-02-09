@@ -81,7 +81,7 @@ export default function OverviewPage() {
 
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-gray-200 text-gray-800">
             <th className="border p-2">Week #</th>
             <th className="border p-2">Score (%)</th>
             <th className="border p-2">Reflection</th>

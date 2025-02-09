@@ -38,7 +38,6 @@ export default function SetupGoalsPage() {
   }
 
   function handleEditGoal(id: string) {
-    // Enable editing mode
     const goalToEdit = goals.find((g) => g.id === id);
     if (!goalToEdit) return;
     setEditingId(id);
@@ -65,7 +64,7 @@ export default function SetupGoalsPage() {
   }
 
   return (
-    <main className="bg-[var(--background)] text-[var(--foreground)] min-h-screen p-4">
+    <div className="py-4">
       <h1 className="text-3xl font-bold mb-6">Setup Goals</h1>
 
       <div className="mb-8 max-w-xl">
@@ -74,14 +73,14 @@ export default function SetupGoalsPage() {
           <input
             type="text"
             placeholder="Title"
-            className="border p-2 flex-1 rounded"
+            className="border p-2 flex-1 rounded text-gray-800"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <input
             type="text"
             placeholder="Description"
-            className="border p-2 flex-1 rounded"
+            className="border p-2 flex-1 rounded text-gray-800"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -97,20 +96,23 @@ export default function SetupGoalsPage() {
       <h2 className="text-xl font-semibold mb-3">Goals List</h2>
       <ul className="space-y-2 max-w-xl">
         {goals.map((g) => (
-          <li key={g.id} className="bg-gray-200 p-3 rounded flex flex-col">
+          <li
+            key={g.id}
+            className="bg-gray-200 p-3 rounded flex flex-col text-gray-800"
+          >
             {editingId === g.id ? (
               <>
                 {/* Edit form */}
-                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                <div className="flex flex-col sm:flex-row gap-2 mb-2 text-gray-800">
                   <input
                     type="text"
-                    className="border p-2 flex-1 rounded"
+                    className="border p-2 flex-1 rounded text-gray-800"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                   />
                   <input
                     type="text"
-                    className="border p-2 flex-1 rounded"
+                    className="border p-2 flex-1 rounded text-gray-800"
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                   />
@@ -132,7 +134,6 @@ export default function SetupGoalsPage() {
               </>
             ) : (
               <>
-                {/* Read-only view */}
                 <strong className="text-lg">{g.title}</strong>
                 {g.description && (
                   <span className="text-sm">{g.description}</span>
@@ -157,6 +158,6 @@ export default function SetupGoalsPage() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }
