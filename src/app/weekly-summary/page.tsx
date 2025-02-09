@@ -8,11 +8,33 @@ import {
 } from "@/utils/localStorage";
 import { WeeklySummary, DailyEntry } from "@/utils/types";
 
-// Base Monday date for week #1
-const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
+/**
+ * Dynamically read the "baseMonday" from localStorage,
+ * or default to 2025-02-03 if not set.
+ * This matches the logic used in HomePage so Week #1
+ * lines up with the user's chosen Monday.
+ */
+function getBaseMondayDate(): Date {
+  const stored =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("baseMonday")
+      : null;
 
+  if (stored) {
+    return new Date(`${stored}T08:00:00.000Z`);
+  } else {
+    return new Date("2025-02-03T08:00:00.000Z");
+  }
+}
+
+/**
+ * Return the date range (start, end) for a given weekNumber
+ * using the dynamic baseMondayDate from localStorage.
+ */
 function getDateRangeForWeek(weekNumber: number) {
+  const baseMondayDate = getBaseMondayDate();
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
+
   const startDate = new Date(
     baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
   );
@@ -23,12 +45,22 @@ function getDateRangeForWeek(weekNumber: number) {
   return { start, end };
 }
 
+/**
+ * Helper to convert "YYYY-MM-DD" into a numeric (e.g. 20250307) for comparisons.
+ */
 function dateStringToNumber(dateStr: string) {
   return parseInt(dateStr.replace(/-/g, ""), 10);
 }
 
-/** Compute a dynamic score for a given weekNumber. */
-function calculateWeekScore(weekNumber: number, allDaily: DailyEntry[]) {
+/**
+ * Compute a dynamic score for the given week, ignoring any
+ * "score" stored in WeeklySummary. We look at all daily tasks
+ * within that 7-day date range and compute an S/A/B/C average.
+ */
+function calculateWeekScore(
+  weekNumber: number,
+  allDaily: DailyEntry[]
+): number {
   const { start, end } = getDateRangeForWeek(weekNumber);
   const startNum = dateStringToNumber(start);
   const endNum = dateStringToNumber(end);
@@ -77,27 +109,39 @@ export default function WeeklySummaryPage() {
     null
   );
 
-  // We'll track all daily entries for dynamic score
+  // Track all daily entries, weekly summaries
   const [allDaily, setAllDaily] = useState<DailyEntry[]>([]);
   const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
 
+  // We'll store the date range for the current weekNumber (for display)
+  const [weekStart, setWeekStart] = useState("");
+  const [weekEnd, setWeekEnd] = useState("");
+
+  // On mount, load daily + weekly data from localStorage
   useEffect(() => {
     const daily = getDailyEntries();
     setAllDaily(daily);
 
-    const summ = getWeeklySummaries().sort(
+    const sums = getWeeklySummaries().sort(
       (a, b) => a.weekNumber - b.weekNumber
     );
-    setAllSummaries(summ);
+    setAllSummaries(sums);
   }, []);
 
-  // Recalc whenever weekNumber changes or data changes
+  // Re-run each time weekNumber or data changes
   useEffect(() => {
     if (allDaily.length === 0 && allSummaries.length === 0) return;
 
-    const computed = calculateWeekScore(weekNumber, allDaily);
-    setScore(computed);
+    // 1) figure out date range (start, end) for the chosen week
+    const { start, end } = getDateRangeForWeek(weekNumber);
+    setWeekStart(start);
+    setWeekEnd(end);
 
+    // 2) compute dynamic weekly score
+    const newScore = calculateWeekScore(weekNumber, allDaily);
+    setScore(newScore);
+
+    // 3) see if there's an existing weekly summary in localStorage
     const found = allSummaries.find((s) => s.weekNumber === weekNumber);
     if (found) {
       setExistingSummary(found);
@@ -106,6 +150,7 @@ export default function WeeklySummaryPage() {
       setExistingSummary(null);
       setReflection("");
     }
+
     setReflectionEditMode(false);
   }, [weekNumber, allDaily, allSummaries]);
 
@@ -117,6 +162,7 @@ export default function WeeklySummaryPage() {
     };
     saveWeeklySummary(newSummary);
 
+    // Update local array
     const updated = [...allSummaries];
     const idx = updated.findIndex((s) => s.weekNumber === weekNumber);
     if (idx >= 0) updated[idx] = newSummary;
@@ -135,8 +181,8 @@ export default function WeeklySummaryPage() {
       {/* Gradient Hero */}
       <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Weekly Summary</h1>
-        <p className="max-w-xl mx-auto">
-          Check your weekly score, reflection notes and past weeks below.
+        <p className="max-w-xl mx-auto text-lg">
+          Check your weekly summary and which dates the current week covers.
         </p>
       </div>
 
@@ -161,9 +207,17 @@ export default function WeeklySummaryPage() {
             </label>
           </div>
 
-          <div className="flex justify-center mb-4">
-            <p className="text-xl text-gray-800">
-              Computed Score for Week #{weekNumber}: <strong>{score}%</strong>
+          <div className="text-center mb-4 text-gray-800">
+            {/* Show date range for the current week */}
+            <p className="text-lg font-medium">
+              Week #{weekNumber} covers:{" "}
+              <span className="text-blue-600 font-semibold">
+                {weekStart} - {weekEnd}
+              </span>
+            </p>
+
+            <p className="text-xl mt-3">
+              Computed Score: <strong>{score}%</strong>
             </p>
           </div>
 
@@ -195,7 +249,7 @@ export default function WeeklySummaryPage() {
             )}
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 mb-8">
             {reflectionEditMode ? (
               <button
                 onClick={handleSave}
@@ -214,7 +268,7 @@ export default function WeeklySummaryPage() {
           </div>
 
           {existingSummary && !reflectionEditMode && (
-            <p className="mt-4 text-green-600 text-center">
+            <p className="mb-6 text-green-600 text-center">
               Loaded existing summary for Week #{existingSummary.weekNumber}.
             </p>
           )}

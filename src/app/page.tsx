@@ -329,7 +329,7 @@ export default function HomePage() {
         <p className="max-w-2xl mx-auto text-2xl">
           Gamified Habit and Performance Tracker
         </p>
-        <p className="max-w-2xl mx-auto text-sm">
+        <p className="max-w-2xl mx-auto text-lg">
           Track your goals, daily tasks, and weekly progress in one place.
         </p>
       </div>
