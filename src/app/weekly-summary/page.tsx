@@ -221,7 +221,7 @@ export default function WeeklySummaryPage() {
       <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Weekly Summary</h1>
         <p className="max-w-xl mx-auto text-lg">
-          Check your weekly summary and which dates the current week covers.
+          Check weekly summaries and which dates the selected week covers.
         </p>
       </div>
 

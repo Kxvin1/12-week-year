@@ -74,9 +74,9 @@ export default function SetupGoalsPage() {
     <>
       {/* Gradient Hero */}
       <div className="bg-gradient-to-r from-pink-500 to-yellow-400 py-12 text-center text-white rounded-lg">
-        <h1 className="text-4xl font-bold mb-2">Setup Your 12-Week Goals</h1>
+        <h1 className="text-4xl font-bold mb-2">Setup Goals</h1>
         <p className="max-w-xl mx-auto text-xl mb-2">
-          Create and manage your 12-week goals to stay on track!
+          Setup and manage your 12-week goals to stay on track!
         </p>
         <p className="max-w-xl mx-auto mb-2">
           Once added, these goals are shown on the home page for easier

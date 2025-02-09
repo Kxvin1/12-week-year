@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Setup Goals
             </Link>
             <Link href="/daily" className="hover:underline">
-              Daily Summary
+              Daily Tasks
             </Link>
             <Link href="/weekly-summary" className="hover:underline">
               Weekly Summary

@@ -436,7 +436,7 @@ export default function HomePage() {
           {/* Import/Export + CLEAR DATA */}
           <section className="pt-4">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              Import / Export Data
+              Import / Export - JSON Only
             </h2>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
