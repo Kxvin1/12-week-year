@@ -63,7 +63,6 @@ export default function SetupGoalsPage() {
     setEditDescription("");
   }
 
-  // Press Enter in either field -> handleAddGoal()
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       handleAddGoal();

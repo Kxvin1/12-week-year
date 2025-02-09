@@ -223,13 +223,9 @@ function formatTime(date: Date): string {
     year: "numeric",
   };
   const datePart = date.toLocaleDateString("en-US", options);
-  // e.g. "March 07, 2025"
-  // If we don't want the comma, we can remove it by manual formatting
-  // or we can just replace the comma:
-  const datePartNoComma = datePart.replace(",", "");
 
-  // final: "12:50 A.M. | March 07 2025"
-  return `${timePart} | ${datePartNoComma}`;
+  // final: "12:50 A.M. | March 07, 2025"
+  return `${timePart} | ${datePart}`;
 }
 
 /* -------------- MAIN COMPONENT -------------- */
@@ -335,7 +331,7 @@ export default function HomePage() {
       </div>
       {/* Current Time & Date Display */}
       <div className="bg-slate-700 text-center p-4 text-lg font-semibold text-green-400 rounded-b-lg">
-        {/* Example: "12:50 A.M. | March 07 2025" */}
+        {/* Example: "12:50 A.M. | March 07, 2025" */}
         {currentTime}
         <span className="text-sm ml-4">PST (UTC/GMT-8)</span>
       </div>
