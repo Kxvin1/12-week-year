@@ -105,7 +105,7 @@ export default function DailyPage() {
   return (
     <>
       {/* Gradient Hero */}
-      <div className="bg-gradient-to-r from-blue-500 to-cyan-400 py-12 text-center text-white">
+      <div className="bg-gradient-to-r from-blue-500 to-cyan-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Daily Tasks</h1>
         <p className="max-w-xl mx-auto">
           Log tasks and assign tiers for each day to track your progress.

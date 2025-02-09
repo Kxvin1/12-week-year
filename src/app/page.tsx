@@ -278,7 +278,7 @@ export default function HomePage() {
   return (
     <>
       {/* Gradient "Hero" Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center">
+      <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center rounded-lg">
         <h1 className="text-5xl font-bold mb-4">The 12-Week Year</h1>
         <p className="max-w-2xl mx-auto text-2xl">
           Gamified Habit and Performance Tracker

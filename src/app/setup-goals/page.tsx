@@ -73,7 +73,7 @@ export default function SetupGoalsPage() {
   return (
     <>
       {/* Gradient Hero */}
-      <div className="bg-gradient-to-r from-pink-500 to-yellow-400 py-12 text-center text-white">
+      <div className="bg-gradient-to-r from-pink-500 to-yellow-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Setup Goals</h1>
         <p className="max-w-xl mx-auto">
           Create and manage your 12-week goals to stay on track!

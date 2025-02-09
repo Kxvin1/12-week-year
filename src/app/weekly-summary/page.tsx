@@ -133,7 +133,7 @@ export default function WeeklySummaryPage() {
   return (
     <>
       {/* Gradient Hero */}
-      <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white">
+      <div className="bg-gradient-to-r from-purple-500 to-pink-400 py-12 text-center text-white rounded-lg">
         <h1 className="text-4xl font-bold mb-2">Weekly Summary</h1>
         <p className="max-w-xl mx-auto">
           Check your weekly score and reflection, and see past weeks below.
