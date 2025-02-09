@@ -8,44 +8,26 @@ import {
 } from "@/utils/localStorage";
 import { WeeklySummary, DailyEntry } from "@/utils/types";
 
-/**
- * Helper function to determine the date range for a given "week number".
- * This can vary depending on how you define "week #1" start date.
- * For this example, let's assume week #1 starts on some fixed date,
- * or you let the user pick a "start date" externally.
- * Adjust logic as needed.
- */
-function getDateRangeForWeek(weekNumber: number) {
-  // Example: let's say week #1 started on 2025-02-05.
-  // Each week is 7 days. So:
-  const startOfFirstWeek = new Date("2025-02-05");
+// Always start at Monday 2025-02-03, 00:00
+const baseMondayDate = new Date("2025-02-03T08:00:00.000Z");
+// Note: "T08:00:00Z" is roughly midnight PST, but real PST handling would need a more robust approach.
 
+function getDateRangeForWeek(weekNumber: number) {
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
   const startDate = new Date(
-    startOfFirstWeek.getTime() + (weekNumber - 1) * oneWeekInMs
+    baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
   );
-  const endDate = new Date(startDate.getTime() + oneWeekInMs - 1); // 7 days later, minus 1 ms
+  const endDate = new Date(startDate.getTime() + oneWeekInMs - 1);
 
-  // Format them as YYYY-MM-DD for easier comparison with your daily entries
   const start = startDate.toISOString().split("T")[0];
   const end = endDate.toISOString().split("T")[0];
   return { start, end };
 }
 
-/**
- * Convert a date string 'YYYY-MM-DD' into a comparable numeric (e.g., 20250205).
- * Helpful for comparisons.
- */
 function dateStringToNumber(dateStr: string) {
   return parseInt(dateStr.replace(/-/g, ""), 10);
 }
 
-/**
- * Calculate the score for a given array of daily entries.
- * For each DailyTask: S=4, A=3, B=2, C=1.
- * Then we average them or sum them up.
- * For simplicity, let's do an average (0-4).
- */
 function calculateWeeklyScore(dailyEntries: DailyEntry[]) {
   let total = 0;
   let count = 0;
@@ -70,10 +52,7 @@ function calculateWeeklyScore(dailyEntries: DailyEntry[]) {
     });
   });
 
-  if (count === 0) return 0; // No tasks, no score
-
-  // For a percentage or 0-4 scale, you can choose.
-  // Let's do "percent" with 4 being 100%, so 4 => 100%, 3 => 75%, etc.
+  if (count === 0) return 0;
   const average = total / count; // 0 to 4
   const percentage = (average / 4) * 100; // 0 to 100
   return Math.round(percentage);
@@ -87,12 +66,13 @@ export default function WeeklySummaryPage() {
     null
   );
 
-  useEffect(() => {
-    // Whenever weekNumber changes, recalc the date range & compute the score
-    const { start, end } = getDateRangeForWeek(weekNumber);
+  // This controls whether reflection is read-only or editable
+  const [reflectionEditMode, setReflectionEditMode] = useState(false);
 
+  useEffect(() => {
+    const { start, end } = getDateRangeForWeek(weekNumber);
     const entries = getDailyEntries();
-    // Filter daily entries that fall within [start, end]
+
     const startNum = dateStringToNumber(start);
     const endNum = dateStringToNumber(end);
 
@@ -101,11 +81,9 @@ export default function WeeklySummaryPage() {
       return entryNum >= startNum && entryNum <= endNum;
     });
 
-    // Calculate score
     const newScore = calculateWeeklyScore(filteredEntries);
     setScore(newScore);
 
-    // Check if we already have a saved WeeklySummary for this week
     const summaries = getWeeklySummaries();
     const found = summaries.find((s) => s.weekNumber === weekNumber);
     if (found) {
@@ -115,6 +93,7 @@ export default function WeeklySummaryPage() {
       setExistingSummary(null);
       setReflection("");
     }
+    setReflectionEditMode(false); // reset edit mode if week changes
   }, [weekNumber]);
 
   function handleSave() {
@@ -125,19 +104,20 @@ export default function WeeklySummaryPage() {
     };
     saveWeeklySummary(newSummary);
     alert("Weekly summary saved!");
+    setExistingSummary(newSummary);
+    setReflectionEditMode(false);
   }
 
   return (
-    <main className="p-4">
-      <h1 className="text-2xl mb-4">Weekly Summary</h1>
+    <main className="bg-[var(--background)] text-[var(--foreground)] min-h-screen p-4">
+      <h1 className="text-3xl font-bold mb-6">Weekly Summary</h1>
 
-      {/* Week Number Selector (1 to 12, for example) */}
-      <div className="mb-4">
-        <label className="mr-2">Week Number:</label>
+      <div className="mb-4 flex items-center gap-2">
+        <label className="mr-2 font-semibold">Week Number:</label>
         <select
           value={weekNumber}
           onChange={(e) => setWeekNumber(parseInt(e.target.value, 10))}
-          className="border p-2"
+          className="border p-2 rounded"
         >
           {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
             <option key={num} value={num}>
@@ -151,23 +131,52 @@ export default function WeeklySummaryPage() {
         Computed Score: <strong>{score}%</strong> (0 - 100%)
       </p>
 
-      <div className="mb-4">
-        <label className="block mb-2">Reflection:</label>
-        <textarea
-          className="border p-2 w-full"
-          rows={5}
-          value={reflection}
-          onChange={(e) => setReflection(e.target.value)}
-        />
+      {/* Reflection Edit/Read Mode */}
+      {reflectionEditMode ? (
+        <div className="mb-4">
+          <label className="block mb-2 font-semibold">
+            Reflection (Editing):
+          </label>
+          <textarea
+            className="border p-2 w-full rounded"
+            rows={5}
+            value={reflection}
+            onChange={(e) => setReflection(e.target.value)}
+          />
+        </div>
+      ) : (
+        <div className="mb-4">
+          <label className="block mb-2 font-semibold">Reflection:</label>
+          <div className="border p-2 w-full bg-gray-100 rounded min-h-[100px]">
+            {reflection
+              ? reflection
+              : "No reflection yet. Click 'Edit Reflection' to add one."}
+          </div>
+        </div>
+      )}
+
+      {/* Buttons */}
+      <div className="flex gap-4">
+        {reflectionEditMode ? (
+          <button
+            onClick={handleSave}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Save Weekly Summary
+          </button>
+        ) : (
+          <button
+            onClick={() => setReflectionEditMode(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Edit Reflection
+          </button>
+        )}
       </div>
 
-      <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2">
-        Save Weekly Summary
-      </button>
-
-      {existingSummary && (
+      {existingSummary && !reflectionEditMode && (
         <p className="mt-4 text-green-600">
-          Loaded an existing summary for Week #{existingSummary.weekNumber}.
+          Loaded existing summary for Week #{existingSummary.weekNumber}.
         </p>
       )}
     </main>

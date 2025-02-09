@@ -10,12 +10,21 @@ export default function SetupGoalsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  // Track which goal is being edited
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
   useEffect(() => {
     setGoals(getGoals());
   }, []);
 
   function handleAddGoal() {
-    const newGoals = [...goals, { id: uuidv4(), title, description }];
+    if (!title) return; // at least need a title
+    const newGoals = [
+      ...goals,
+      { id: uuidv4(), title: title.trim(), description: description.trim() },
+    ];
     saveGoals(newGoals);
     setGoals(newGoals);
     setTitle("");
@@ -28,44 +37,123 @@ export default function SetupGoalsPage() {
     setGoals(updated);
   }
 
-  return (
-    <main className="p-4">
-      <h1 className="text-2xl mb-4">Setup Goals</h1>
+  function handleEditGoal(id: string) {
+    // Enable editing mode
+    const goalToEdit = goals.find((g) => g.id === id);
+    if (!goalToEdit) return;
+    setEditingId(id);
+    setEditTitle(goalToEdit.title);
+    setEditDescription(goalToEdit.description || "");
+  }
 
-      <div className="mb-6">
-        <h2 className="text-xl">Add New Goal</h2>
-        <input
-          type="text"
-          placeholder="Title"
-          className="border p-2 mr-2"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          className="border p-2 mr-2"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button
-          onClick={handleAddGoal}
-          className="bg-blue-500 text-white px-4 py-2"
-        >
-          Save Goal
-        </button>
+  function handleSaveEdit(id: string) {
+    const updatedGoals = goals.map((g) => {
+      if (g.id === id) {
+        return {
+          ...g,
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+        };
+      }
+      return g;
+    });
+    saveGoals(updatedGoals);
+    setGoals(updatedGoals);
+    setEditingId(null);
+    setEditTitle("");
+    setEditDescription("");
+  }
+
+  return (
+    <main className="bg-[var(--background)] text-[var(--foreground)] min-h-screen p-4">
+      <h1 className="text-3xl font-bold mb-6">Setup Goals</h1>
+
+      <div className="mb-8 max-w-xl">
+        <h2 className="text-xl font-semibold mb-2">Add New Goal</h2>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            placeholder="Title"
+            className="border p-2 flex-1 rounded"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            className="border p-2 flex-1 rounded"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <button
+            onClick={handleAddGoal}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Save Goal
+          </button>
+        </div>
       </div>
 
-      <ul>
+      <h2 className="text-xl font-semibold mb-3">Goals List</h2>
+      <ul className="space-y-2 max-w-xl">
         {goals.map((g) => (
-          <li key={g.id} className="mb-2">
-            <strong>{g.title}</strong> - {g.description}
-            <button
-              onClick={() => handleDeleteGoal(g.id)}
-              className="ml-2 text-red-600"
-            >
-              Delete
-            </button>
+          <li key={g.id} className="bg-gray-200 p-3 rounded flex flex-col">
+            {editingId === g.id ? (
+              <>
+                {/* Edit form */}
+                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                  <input
+                    type="text"
+                    className="border p-2 flex-1 rounded"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className="border p-2 flex-1 rounded"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleSaveEdit(g.id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    className="bg-gray-400 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Read-only view */}
+                <strong className="text-lg">{g.title}</strong>
+                {g.description && (
+                  <span className="text-sm">{g.description}</span>
+                )}
+
+                <div className="mt-2 flex gap-4">
+                  <button
+                    onClick={() => handleEditGoal(g.id)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteGoal(g.id)}
+                    className="bg-red-600 text-white px-3 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>
