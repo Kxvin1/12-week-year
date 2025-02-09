@@ -29,13 +29,13 @@ export default function HomePage() {
             <li key={goal.id}>{goal.title}</li>
           ))}
         </ul>
+        <nav className="flex gap-4 mt-6">
+          <Link href="/setup-goals">Setup Goals</Link>
+          <Link href="/daily">Daily View</Link>
+          <Link href="/weekly-summary">Weekly Summary</Link>
+          <Link href="/overview">Overview</Link>
+        </nav>
       </section>
-      <nav className="flex gap-4 mt-6">
-        <Link href="/setup-goals">Setup Goals</Link>
-        <Link href="/daily">Daily View</Link>
-        <Link href="/weekly-summary">Weekly Summary</Link>
-        <Link href="/overview">Overview</Link>
-      </nav>
     </main>
   );
 }
