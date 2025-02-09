@@ -45,17 +45,14 @@ function getDateRangeForWeek(weekNumber: number) {
   return { start, end };
 }
 
-/**
- * Helper to convert "YYYY-MM-DD" into a numeric (e.g. 20250307) for comparisons.
- */
+/** Convert "YYYY-MM-DD" => number for date comparisons */
 function dateStringToNumber(dateStr: string) {
   return parseInt(dateStr.replace(/-/g, ""), 10);
 }
 
 /**
- * Compute a dynamic score for the given week, ignoring any
- * "score" stored in WeeklySummary. We look at all daily tasks
- * within that 7-day date range and compute an S/A/B/C average.
+ * Compute a dynamic score (S/A/B/C) for the given week by scanning daily tasks
+ * in that 7-day date range, ignoring any "score" in WeeklySummary itself.
  */
 function calculateWeekScore(
   weekNumber: number,
@@ -99,8 +96,28 @@ function calculateWeekScore(
   return Math.round(percentage);
 }
 
+/**
+ * Same logic as in Home page: figure out how many total unique days
+ * have been completed to figure out the "current" week.
+ * For example:
+ * - 0 daily entries => week 1
+ * - 1-7 daily entries => week 1
+ * - 8-14 => week 2, etc.
+ */
+function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
+  if (dailyEntries.length === 0) return 1;
+  const uniqueDays = new Set(dailyEntries.map((d) => d.date));
+  const countDays = uniqueDays.size;
+  // e.g. 1-7 => week 1, 8-14 => week 2, etc.
+  const weekNum = Math.floor((countDays - 1) / 7) + 1;
+  return weekNum < 1 ? 1 : weekNum;
+}
+
 export default function WeeklySummaryPage() {
-  const [weekNumber, setWeekNumber] = useState(1);
+  // Instead of always defaulting to "1", we can do a "lazy" approach
+  // and set it to 1 for now, then update once we load daily data
+  const [weekNumber, setWeekNumber] = useState<number>(1);
+
   const [score, setScore] = useState(0);
   const [reflection, setReflection] = useState("");
   const [reflectionEditMode, setReflectionEditMode] = useState(false);
@@ -126,6 +143,10 @@ export default function WeeklySummaryPage() {
       (a, b) => a.weekNumber - b.weekNumber
     );
     setAllSummaries(sums);
+
+    // Once we have daily data, compute the "current" week
+    const currentWeek = determineCurrentWeekNumber(daily);
+    setWeekNumber(currentWeek);
   }, []);
 
   // Re-run each time weekNumber or data changes
@@ -154,7 +175,20 @@ export default function WeeklySummaryPage() {
     setReflectionEditMode(false);
   }, [weekNumber, allDaily, allSummaries]);
 
+  /**
+   * For saving the summary.
+   * Show a confirm if reflection is empty & there's a real score > 0
+   * (meaning the user actually has tasks).
+   */
   function handleSave() {
+    // If there are tasks (score>0) but reflection is empty => prompt user
+    if (score > 0 && !reflection.trim()) {
+      const confirmed = confirm(
+        "Your reflection is empty, but you have tasks for this week. Are you sure you want to finalize without adding a reflection?"
+      );
+      if (!confirmed) return;
+    }
+
     const newSummary: WeeklySummary = {
       weekNumber,
       score,
@@ -175,6 +209,11 @@ export default function WeeklySummaryPage() {
     setReflectionEditMode(false);
     alert("Weekly summary saved!");
   }
+
+  // Decide if we show the "warning" about reflection
+  // Only show if there's tasks in this week => score>0
+  // AND no existing summary => i.e. this week not saved
+  const showReflectionWarning = score > 0 && !existingSummary;
 
   return (
     <>
@@ -221,7 +260,13 @@ export default function WeeklySummaryPage() {
             </p>
           </div>
 
-          {/* Reflection Section */}
+          {showReflectionWarning && (
+            <p className="text-red-600 font-medium mb-4 text-center">
+              You have tasks this week but no reflection is saved! Add a
+              reflection to finalize this week.
+            </p>
+          )}
+
           <div className="max-w-2xl mx-auto text-gray-800 mb-6">
             {reflectionEditMode ? (
               <>

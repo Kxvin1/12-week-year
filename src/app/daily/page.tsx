@@ -92,6 +92,10 @@ export default function DailyPage() {
   // New task input
   const [newTaskName, setNewTaskName] = useState("");
 
+  // We'll store which task row is in "edit" mode for the name
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+
   useEffect(() => {
     // Each time user picks a new date, we load or build an entry
     const allEntries = getDailyEntries();
@@ -103,14 +107,12 @@ export default function DailyPage() {
     } else {
       // Build a new entry from the most recent day
       const newEntry = buildNewEntry(allEntries, selectedDate);
-
-      // Save it to localStorage
-      const updated = [...allEntries, newEntry];
-      // you might want to sort or keep them consistent
-      // but not strictly necessary
-      saveDailyEntry(newEntry); // this updates localStorage key dailyEntries
+      saveDailyEntry(newEntry);
       setDailyEntry(newEntry);
     }
+    // Reset any editing
+    setEditingIndex(null);
+    setEditName("");
   }, [selectedDate]);
 
   // Add a brand-new task to the current day
@@ -125,6 +127,44 @@ export default function DailyPage() {
     };
     setDailyEntry(updatedEntry);
     setNewTaskName("");
+  }
+
+  // Edit button -> start editing
+  function handleEditTask(index: number) {
+    if (!dailyEntry) return;
+    setEditingIndex(index);
+    setEditName(dailyEntry.tasks[index].taskId);
+  }
+
+  // Save the new name
+  function handleSaveTaskName(index: number) {
+    if (!dailyEntry) return;
+    if (!editName.trim()) {
+      alert("Task name cannot be empty!");
+      return;
+    }
+    const updatedEntry = { ...dailyEntry };
+    updatedEntry.tasks[index].taskId = editName.trim();
+    setDailyEntry(updatedEntry);
+    setEditingIndex(null);
+    setEditName("");
+  }
+
+  // Cancel editing
+  function handleCancelEdit() {
+    setEditingIndex(null);
+    setEditName("");
+  }
+
+  // Delete a task
+  function handleDeleteTask(index: number) {
+    if (!dailyEntry) return;
+    const confirmed = confirm("Are you sure you want to delete this task?");
+    if (!confirmed) return;
+
+    const updatedEntry = { ...dailyEntry };
+    updatedEntry.tasks.splice(index, 1);
+    setDailyEntry(updatedEntry);
   }
 
   // Update the tier for an existing task
@@ -221,9 +261,10 @@ export default function DailyPage() {
               <table className="w-full border-collapse mb-4">
                 <thead>
                   <tr className="bg-gray-400 text-gray-800">
-                    <th className="border p-2">Task Name</th>
-                    <th className="border p-2">Tier (S/A/B/C)</th>
-                    <th className="border p-2">Notes</th>
+                    <th className="border p-2 w-1/4">Task Name</th>
+                    <th className="border p-2 w-1/6">Tier (S/A/B/C)</th>
+                    <th className="border p-2 w-1/2">Notes</th>
+                    <th className="border p-2 w-1/6">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -235,7 +276,21 @@ export default function DailyPage() {
                         key={index}
                         className="text-center bg-gray-200 text-gray-800"
                       >
-                        <td className="border p-2">{task.taskId}</td>
+                        {/* Task Name Cell */}
+                        <td className="border p-2">
+                          {editingIndex === index ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                className="border rounded p-1 w-full"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                              />
+                            </div>
+                          ) : (
+                            <span>{task.taskId}</span>
+                          )}
+                        </td>
 
                         {/* Tier Column */}
                         <td className="border p-2">
@@ -260,7 +315,7 @@ export default function DailyPage() {
                           </div>
                         </td>
 
-                        {/* Notes */}
+                        {/* Notes Column */}
                         <td className="border p-2">
                           <textarea
                             className="border rounded p-1 w-full"
@@ -271,6 +326,41 @@ export default function DailyPage() {
                               handleNotesChange(index, e.target.value)
                             }
                           />
+                        </td>
+
+                        {/* Actions Column (Edit/Delete) */}
+                        <td className="border p-2">
+                          {editingIndex === index ? (
+                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                              <button
+                                onClick={() => handleSaveTaskName(index)}
+                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="bg-gray-400 px-3 py-1 rounded hover:bg-gray-500 transition"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                              <button
+                                onClick={() => handleEditTask(index)}
+                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTask(index)}
+                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
