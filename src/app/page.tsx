@@ -178,7 +178,7 @@ function importData(file: File) {
 
       alert("Data imported successfully! Please refresh the page.");
     } catch (err) {
-      alert("Error importing data. Invalid JSON file.");
+      alert(`Error importing data. Invalid JSON file. Console Error: ${err}`);
     }
   };
   reader.readAsText(file);
