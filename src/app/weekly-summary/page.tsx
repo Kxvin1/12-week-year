@@ -255,9 +255,13 @@ export default function WeeklySummaryPage() {
               </span>
             </p>
 
-            <p className="text-xl mt-3">
-              Computed Score: <strong>{score}%</strong>
-            </p>
+            {score ? (
+              <p className="text-xl mt-3">
+                Computed Score: <strong>{score}%</strong>
+              </p>
+            ) : (
+              ""
+            )}
           </div>
 
           {showReflectionWarning && (

@@ -458,7 +458,7 @@ export default function HomePage() {
             </div>
 
             <h2 className="text-sm font-semibold text-red-600 mb-2 mt-8">
-              <strong>NOTE:</strong> This data is saved on the browser&apos;s
+              <strong>NOTE:</strong> This data is saved on your browser&apos;s
               local storage.
               <br />
               Your data will persist as long as you don&apos;t clear your
