@@ -424,9 +424,14 @@ export default function HomePage() {
                 </tbody>
               </table>
             )}
-            <p className="mt-4 text-gray-700">
-              <strong>Overall Average Score:</strong> {overallAverage}%
-            </p>
+
+            {overallAverage ? (
+              <p className="mt-4 text-gray-700">
+                <strong>Overall Average Score:</strong> {overallAverage}%
+              </p>
+            ) : (
+              ""
+            )}
           </section>
 
           {/* Import/Export + CLEAR DATA */}
