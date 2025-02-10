@@ -230,7 +230,7 @@ function formatTime(date: Date): string {
 /* -------------- MAIN COMPONENT -------------- */
 export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [currentWeekNumber, setCurrentWeekNumber] = useState(3);
+  const [currentWeekNumber, setCurrentWeekNumber] = useState<number | null>(3);
   const [currentWeekScore, setCurrentWeekScore] = useState<number | null>(null);
   const [allSummaries, setAllSummaries] = useState<WeeklySummary[]>([]);
   const [dailyEntries, setDailyEntries] = useState<DailyEntry[]>([]);
