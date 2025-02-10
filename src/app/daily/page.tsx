@@ -15,11 +15,16 @@ function shiftDate(dateStr: string, days: number) {
  * PST-based current date (naive approach)
  */
 function getTodayPST() {
-  const laString = new Date().toLocaleString("en-US", {
+  const now = new Date();
+  const options: Intl.DateTimeFormatOptions = {
     timeZone: "America/Los_Angeles",
-  });
-  const laDate = new Date(laString);
-  return laDate.toISOString().split("T")[0]; // YYYY-MM-DD
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
+  const laDateString = now.toLocaleDateString("en-US", options);
+  const [month, day, year] = laDateString.split("/");
+  return `${year}-${month}-${day}`;
 }
 
 /**
