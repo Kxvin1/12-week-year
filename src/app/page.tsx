@@ -271,8 +271,8 @@ export default function HomePage() {
     }
     let totalScore = 0;
     let count = 0;
-    allSummaries.forEach((s) => {
-      const dynamicScore = computeWeekScore(s.weekNumber, dailyEntries);
+    allSummaries.forEach((summary) => {
+      const dynamicScore = computeWeekScore(summary.weekNumber, dailyEntries);
       totalScore += dynamicScore;
       count++;
     });
@@ -306,13 +306,23 @@ export default function HomePage() {
     // Sunday=0, Monday=1, etc.
 
     if (day !== 1) {
-      alert("Please pick a Monday date!");
-      e.target.value = chosenMonday; // revert
-      return;
+      // Find the nearest Monday
+      const selectedDate = new Date(selected);
+      const dayOffset = day === 0 ? -6 : 1 - day; // Adjust for Sunday
+      const nearestMonday = new Date(
+        selectedDate.setDate(selectedDate.getDate() + dayOffset)
+      );
+      const nearestMondayStr = nearestMonday.toISOString().split("T")[0];
+
+      alert(`Please pick a Monday date! Nearest Monday: ${nearestMondayStr}`);
+      e.target.value = nearestMondayStr; // Set to nearest Monday
+      setChosenMonday(nearestMondayStr);
+      storeMondayDate(nearestMondayStr);
+    } else {
+      setChosenMonday(selected);
+      storeMondayDate(selected);
     }
 
-    setChosenMonday(selected);
-    storeMondayDate(selected);
     window.location.reload();
   }
 
