@@ -103,7 +103,6 @@ function computeCurrentWeekScore(
     const entryNum = dateStringToNumber(entry.date);
     return entryNum >= startNum && entryNum <= endNum;
   });
-
   return calculateWeeklyScore(filtered);
 }
 
