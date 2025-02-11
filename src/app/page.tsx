@@ -333,10 +333,10 @@ export default function HomePage() {
       <div className="bg-gradient-to-r from-blue-500 to-green-400 py-16 px-4 text-white text-center rounded-t-lg">
         <h1 className="text-5xl font-bold mb-4">The 12-Week Year</h1>
         <p className="max-w-2xl mx-auto text-2xl">
-          Gamified Habit and Performance Tracker
+          Achieve More in 12 Weeks Than Most Do in a Year
         </p>
         <p className="max-w-2xl mx-auto text-lg">
-          Track your goals, daily tasks, and weekly progress in one place.
+          Gamified Habit & Performance Tracking for Maximum Efficiency
         </p>
       </div>
       {/* Current Time & Date Display */}
