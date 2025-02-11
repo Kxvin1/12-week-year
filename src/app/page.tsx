@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   getGoals,
@@ -348,6 +349,60 @@ export default function HomePage() {
       {/* Main Content Card */}
       <div className="max-w-5xl mx-auto pb-8 px-4 -mt-6">
         <div className="bg-white rounded-lg shadow-lg p-6 space-y-8 mt-4">
+          {/* Onboarding Instructions */}
+          <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Getting Started
+            </h2>
+            <p className="text-gray-700 mb-4">
+              Follow these simple steps to make the most out of your 12-week
+              journey:
+            </p>
+            <ol className="list-decimal list-inside text-gray-700 space-y-2">
+              <li>
+                <strong>Pick a Start Monday:</strong> Select the first Monday of
+                your 12-week journey below.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/setup-goals" className="text-blue-600 underline">
+                    Setup Goals:
+                  </Link>
+                </strong>{" "}
+                Define what you want to achieve over the next 12 weeks.
+              </li>
+              <li>
+                <strong>
+                  <Link href="/daily" className="text-blue-600 underline">
+                    Setup Daily Tasks:
+                  </Link>
+                </strong>{" "}
+                These will persist each day, so treat them as habits.
+                <ul className="list-disc list-inside ml-6">
+                  <li>
+                    <strong>Task Updates:</strong> If you edit or delete a task,
+                    the change will carry over to the next day for consistency.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <strong>
+                  <Link
+                    href="/weekly-summary"
+                    className="text-blue-600 underline"
+                  >
+                    Weekly Reflection:
+                  </Link>
+                </strong>{" "}
+                After a full week (Monday–Sunday), visit the Weekly Summary page
+                to review your progress.
+              </li>
+              <li>
+                <strong>Repeat for the Next Weeks:</strong> Continue setting
+                goals and tracking progress for each new week.
+              </li>
+            </ol>
+          </div>
           {/* Monday Picker */}
           <section className="border-b pb-4">
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
