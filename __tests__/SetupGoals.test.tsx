@@ -1,7 +1,7 @@
 // __tests__/SetupGoals.test.tsx
 
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // The page to test
@@ -12,7 +12,7 @@ import { getGoals, saveGoals } from "@/utils/localStorage";
 
 // We also need uuid for IDs, so we can mock it if we want stable IDs
 // But it's optional to mock if you only check text & not the exact ID
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 // 1) Mock the entire localStorage module
 jest.mock("@/utils/localStorage", () => ({
@@ -108,7 +108,7 @@ describe("SetupGoalsPage (setup-goals.tsx)", () => {
     render(<SetupGoalsPage />);
     const user = userEvent.setup();
 
-    const titleInput = screen.getByPlaceholderText(/title/i);
+    // const titleInput = screen.getByPlaceholderText(/title/i);
     const descInput = screen.getByPlaceholderText(/description/i);
     const saveButton = screen.getByRole("button", { name: /save goal/i });
 
@@ -207,7 +207,7 @@ describe("SetupGoalsPage (setup-goals.tsx)", () => {
     const user = userEvent.setup();
 
     const titleInput = screen.getByPlaceholderText(/title/i);
-    const descInput = screen.getByPlaceholderText(/description/i);
+    // const descInput = screen.getByPlaceholderText(/description/i);
 
     // Type something in the title, then press Enter
     await user.type(titleInput, "Goal via Enter{enter}");
