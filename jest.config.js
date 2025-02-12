@@ -25,6 +25,11 @@ const customJestConfig = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
 
+  // IMPORTANT: Tells Jest how to resolve @/... paths to <rootDir>/src/...
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+
   // Example ignoring of certain folders (optional)
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
 };

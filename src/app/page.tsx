@@ -412,11 +412,19 @@ export default function HomePage() {
               This determines Week #1. You can pick any month in the calendar
               UI, but only Mondays are allowed.
             </p>
+            {/* ADDED LABEL + ID FOR ACCESSIBILITY */}
+            <label htmlFor="baseMonday" className="sr-only">
+              Choose Your Start Monday
+            </label>
             <input
+              id="baseMonday"
               type="date"
               value={chosenMonday}
               onChange={handleMondayChange}
               className="border p-2 rounded text-gray-800"
+              aria-label="Choose Your Start Monday"
+              /* 'sr-only' label + this aria-label ensures screen readers 
+                 & testing-library can match on "Choose Your Start Monday". */
             />
           </section>
 
