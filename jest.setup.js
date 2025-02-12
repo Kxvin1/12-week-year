@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 
 // Example: ignore the JSDOM navigation not-implemented errors
 beforeAll(() => {
+  process.env.DEBUG_PRINT_LIMIT = "20"; // smaller but not zero
   const originalError = console.error;
   jest.spyOn(console, "error").mockImplementation((msg, ...args) => {
     if (
