@@ -38,7 +38,8 @@ function getDateRangeForWeek(weekNumber: number) {
   const startDate = new Date(
     baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
   );
-  const endDate = new Date(startDate.getTime() + oneWeekInMs - 1);
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + 6);
 
   const start = startDate.toISOString().split("T")[0];
   const end = endDate.toISOString().split("T")[0];
