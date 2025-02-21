@@ -3,53 +3,8 @@
 import { useState, useEffect } from "react";
 import { getDailyEntries, saveDailyEntry } from "@/utils/localStorage";
 import { DailyEntry } from "@/utils/types";
-
-// Helper to increment/decrement a date string
-function shiftDate(dateStr: string, days: number) {
-  const dateObj = new Date(dateStr);
-  dateObj.setDate(dateObj.getDate() + days);
-  return dateObj.toISOString().split("T")[0];
-}
-
-/**
- * PST-based current date (naive approach)
- */
-function getTodayPST() {
-  const now = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: "America/Los_Angeles",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  };
-  const laDateString = now.toLocaleDateString("en-US", options);
-  const [month, day, year] = laDateString.split("/");
-  return `${year}-${month}-${day}`;
-}
-
-/**
- * Map each tier to Tailwind color classes
- */
-function getTierColor(tier: "S" | "A" | "B" | "C", selected: boolean) {
-  switch (tier) {
-    case "S":
-      return selected
-        ? "bg-green-600 text-white"
-        : "bg-green-200 text-green-800/40";
-    case "A":
-      return selected
-        ? "bg-blue-600 text-white"
-        : "bg-blue-200 text-blue-800/40";
-    case "B":
-      return selected
-        ? "bg-orange-600 text-white"
-        : "bg-orange-200 text-orange-800/40";
-    case "C":
-      return selected ? "bg-red-600 text-white" : "bg-red-200 text-red-800/40";
-    default:
-      return "bg-gray-200 text-gray-800";
-  }
-}
+import { getTodayPST, shiftDate } from "@/utils/clockAndTime";
+import { getTierColor } from "@/utils/weeksAndScores";
 
 /**
  * Create a new DailyEntry based on a "template" of tasks (names only),

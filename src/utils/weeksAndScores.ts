@@ -114,3 +114,27 @@ export function computeWeekScore(
   const percentage = (average / 4) * 100;
   return Math.round(percentage);
 }
+
+/**
+ * Map each tier to Tailwind color classes
+ */
+export function getTierColor(tier: "S" | "A" | "B" | "C", selected: boolean) {
+  switch (tier) {
+    case "S":
+      return selected
+        ? "bg-green-600 text-white"
+        : "bg-green-200 text-green-800/40";
+    case "A":
+      return selected
+        ? "bg-blue-600 text-white"
+        : "bg-blue-200 text-blue-800/40";
+    case "B":
+      return selected
+        ? "bg-orange-600 text-white"
+        : "bg-orange-200 text-orange-800/40";
+    case "C":
+      return selected ? "bg-red-600 text-white" : "bg-red-200 text-red-800/40";
+    default:
+      return "bg-gray-200 text-gray-800";
+  }
+}

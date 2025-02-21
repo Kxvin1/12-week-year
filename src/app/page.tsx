@@ -15,7 +15,7 @@ import {
   computeWeekScore,
 } from "@/utils/weeksAndScores";
 import { exportData, importData, clearAllData } from "@/utils/dataImportExport";
-import { formatTime } from "@/utils/clock";
+import { formatTime } from "@/utils/clockAndTime";
 
 /* -------------- MAIN COMPONENT -------------- */
 export default function HomePage() {
