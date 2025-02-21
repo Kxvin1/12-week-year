@@ -8,21 +8,13 @@ import {
   getWeeklySummaries,
 } from "@/utils/localStorage";
 import { Goal, DailyEntry, WeeklySummary } from "@/utils/types";
-import {
-  getStoredMondayDate,
-  storeMondayDate,
-} from "@/utils/mondayHelperFunctions";
+import { storeMondayDate } from "@/utils/mondayHelperFunctions";
 import {
   determineCurrentWeekNumber,
   computeCurrentWeekScore,
   computeWeekScore,
 } from "@/utils/weeksAndScores";
 import { exportData, importData, clearAllData } from "@/utils/dataImportExport";
-
-/* -------------- DYNAMIC MONDAY STORAGE -------------- */
-export function getBaseMondayDate(): Date {
-  return getStoredMondayDate();
-}
 
 /* -------------- TIME HELPER -------------- */
 /**
