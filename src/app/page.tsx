@@ -12,27 +12,12 @@ import {
   saveWeeklySummaries,
 } from "@/utils/localStorage";
 import { Goal, DailyEntry, WeeklySummary } from "@/utils/types";
+import {
+  getStoredMondayDate,
+  storeMondayDate,
+} from "@/utils/mondayHelperFunctions";
 
 /* -------------- DYNAMIC MONDAY STORAGE -------------- */
-function getStoredMondayDate(): Date {
-  const stored =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem("baseMonday")
-      : null;
-
-  if (stored) {
-    return new Date(`${stored}T08:00:00.000Z`);
-  } else {
-    return new Date("2025-02-03T08:00:00.000Z");
-  }
-}
-
-function storeMondayDate(isoDateStr: string) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem("baseMonday", isoDateStr);
-  }
-}
-
 function getBaseMondayDate(): Date {
   return getStoredMondayDate();
 }
