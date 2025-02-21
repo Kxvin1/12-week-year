@@ -1,3 +1,4 @@
+"use client";
 import { DailyEntry } from "./types";
 import { getBaseMondayDate } from "@/utils/mondayHelperFunctions";
 
