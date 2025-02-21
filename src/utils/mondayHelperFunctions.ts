@@ -19,3 +19,7 @@ export function storeMondayDate(isoDateStr: string) {
     window.localStorage.setItem("baseMonday", isoDateStr);
   }
 }
+
+export function getBaseMondayDate(): Date {
+  return getStoredMondayDate();
+}

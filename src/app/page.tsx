@@ -16,118 +16,15 @@ import {
   getStoredMondayDate,
   storeMondayDate,
 } from "@/utils/mondayHelperFunctions";
+import {
+  determineCurrentWeekNumber,
+  computeCurrentWeekScore,
+  computeWeekScore,
+} from "@/utils/weeksAndScores";
 
 /* -------------- DYNAMIC MONDAY STORAGE -------------- */
-function getBaseMondayDate(): Date {
+export function getBaseMondayDate(): Date {
   return getStoredMondayDate();
-}
-
-/* -------------- LOGIC FOR WEEKS & SCORES -------------- */
-function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
-  if (dailyEntries.length === 0) return 1;
-  const uniqueDays = new Set(dailyEntries.map((day) => day.date));
-  const countDays = uniqueDays.size;
-  const weekNum = Math.floor((countDays - 1) / 7) + 1;
-  return weekNum < 1 ? 1 : weekNum;
-}
-
-function getDateRangeForWeek(weekNumber: number) {
-  const baseMondayDate = getBaseMondayDate();
-  const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-
-  const startDate = new Date(
-    baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
-  );
-  const endDate = new Date(startDate.getTime() + oneWeekInMs - 1);
-
-  const start = startDate.toISOString().split("T")[0];
-  const end = endDate.toISOString().split("T")[0];
-  return { start, end };
-}
-
-function dateStringToNumber(dateStr: string) {
-  return parseInt(dateStr.replace(/-/g, ""), 10);
-}
-
-function calculateWeeklyScore(dailyEntries: DailyEntry[]): number | null {
-  let total = 0;
-  let count = 0;
-  dailyEntries.forEach((entry) => {
-    entry.tasks.forEach((task) => {
-      switch (task.tier) {
-        case "S":
-          total += 4;
-          break;
-        case "A":
-          total += 3;
-          break;
-        case "B":
-          total += 2;
-          break;
-        case "C":
-          total += 1;
-          break;
-      }
-      count++;
-    });
-  });
-  if (count === 0) return null;
-  const average = total / count; // 0–4
-  const percentage = (average / 4) * 100;
-  return Math.round(percentage);
-}
-
-function computeCurrentWeekScore(
-  dailyEntries: DailyEntry[],
-  currentWeekNumber: number
-): number | null {
-  const { start, end } = getDateRangeForWeek(currentWeekNumber);
-  const startNum = dateStringToNumber(start);
-  const endNum = dateStringToNumber(end);
-
-  const filtered = dailyEntries.filter((entry) => {
-    const entryNum = dateStringToNumber(entry.date);
-    return entryNum >= startNum && entryNum <= endNum;
-  });
-  return calculateWeeklyScore(filtered);
-}
-
-function computeWeekScore(weekNumber: number, allDaily: DailyEntry[]): number {
-  const { start, end } = getDateRangeForWeek(weekNumber);
-  const startNum = dateStringToNumber(start);
-  const endNum = dateStringToNumber(end);
-
-  let total = 0;
-  let count = 0;
-  const filtered = allDaily.filter((entry) => {
-    const entryNum = dateStringToNumber(entry.date);
-    return entryNum >= startNum && entryNum <= endNum;
-  });
-
-  filtered.forEach((entry) => {
-    entry.tasks.forEach((task) => {
-      switch (task.tier) {
-        case "S":
-          total += 4;
-          break;
-        case "A":
-          total += 3;
-          break;
-        case "B":
-          total += 2;
-          break;
-        case "C":
-          total += 1;
-          break;
-      }
-      count++;
-    });
-  });
-
-  if (count === 0) return 0;
-  const average = total / count;
-  const percentage = (average / 4) * 100;
-  return Math.round(percentage);
 }
 
 /* -------------- IMPORT / EXPORT -------------- */
@@ -337,7 +234,7 @@ export default function HomePage() {
           {/* Onboarding Instructions */}
           <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Getting Started
+              Quick Start Guide
             </h2>
             <p className="text-gray-700 mb-4">
               Follow these simple steps to make the most out of your 12-week
@@ -365,8 +262,9 @@ export default function HomePage() {
                 These will persist each day, so treat them as habits.
                 <ul className="list-disc list-inside ml-6">
                   <li>
-                    <strong>Task Updates:</strong> If you edit or delete a task,
-                    the change will carry over to the next day for consistency.
+                    <strong>Task Updates:</strong> Once you&apos;ve completed a
+                    week - if you edit or delete a task the changes will carry
+                    over to the next day for consistency.
                   </li>
                 </ul>
               </li>
@@ -380,7 +278,9 @@ export default function HomePage() {
                   </Link>
                 </strong>{" "}
                 After a full week (Monday–Sunday), visit the Weekly Summary page
-                to review your progress.
+                to review your progress and write a reflection (treat this as a
+                weekly summary of how you think you performed that week) to save
+                your progress.
               </li>
               <li>
                 <strong>Repeat for the Next Weeks:</strong> Continue setting
