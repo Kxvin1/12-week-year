@@ -7,112 +7,16 @@ import {
   saveWeeklySummary,
 } from "@/utils/localStorage";
 import { WeeklySummary, DailyEntry } from "@/utils/types";
-
-/**
- * Dynamically read the "baseMonday" from localStorage,
- * or default to 2025-02-03 if not set.
- * This matches the logic used in HomePage so Week #1
- * lines up with the user's chosen Monday.
- */
-function getBaseMondayDate(): Date {
-  const stored =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem("baseMonday")
-      : null;
-
-  if (stored) {
-    return new Date(`${stored}T08:00:00.000Z`);
-  } else {
-    return new Date("2025-02-03T08:00:00.000Z");
-  }
-}
+import {
+  getDateRangeForWeek,
+  computeWeekScore,
+  determineCurrentWeekNumber,
+} from "@/utils/weeksAndScores";
 
 /**
  * Return the date range (start, end) for a given weekNumber
  * using the dynamic baseMondayDate from localStorage.
  */
-function getDateRangeForWeek(weekNumber: number) {
-  const baseMondayDate = getBaseMondayDate();
-  const oneWeekInMs = 7 * 24 * 60 * 60 * 1000;
-
-  const startDate = new Date(
-    baseMondayDate.getTime() + (weekNumber - 1) * oneWeekInMs
-  );
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + 6);
-
-  const start = startDate.toISOString().split("T")[0];
-  const end = endDate.toISOString().split("T")[0];
-  return { start, end };
-}
-
-/** Convert "YYYY-MM-DD" => number for date comparisons */
-function dateStringToNumber(dateStr: string) {
-  return parseInt(dateStr.replace(/-/g, ""), 10);
-}
-
-/**
- * Compute a dynamic score (S/A/B/C) for the given week by scanning daily tasks
- * in that 7-day date range, ignoring any "score" in WeeklySummary itself.
- */
-function calculateWeekScore(
-  weekNumber: number,
-  allDaily: DailyEntry[]
-): number {
-  const { start, end } = getDateRangeForWeek(weekNumber);
-  const startNum = dateStringToNumber(start);
-  const endNum = dateStringToNumber(end);
-
-  let total = 0;
-  let count = 0;
-
-  const filtered = allDaily.filter((entry) => {
-    const entryNum = dateStringToNumber(entry.date);
-    return entryNum >= startNum && entryNum <= endNum;
-  });
-
-  filtered.forEach((entry) => {
-    entry.tasks.forEach((task) => {
-      switch (task.tier) {
-        case "S":
-          total += 4;
-          break;
-        case "A":
-          total += 3;
-          break;
-        case "B":
-          total += 2;
-          break;
-        case "C":
-          total += 1;
-          break;
-      }
-      count++;
-    });
-  });
-
-  if (count === 0) return 0;
-  const average = total / count;
-  const percentage = (average / 4) * 100;
-  return Math.round(percentage);
-}
-
-/**
- * Same logic as in Home page: figure out how many total unique days
- * have been completed to figure out the "current" week.
- * For example:
- * - 0 daily entries => week 1
- * - 1-7 daily entries => week 1
- * - 8-14 => week 2, etc.
- */
-function determineCurrentWeekNumber(dailyEntries: DailyEntry[]): number {
-  if (dailyEntries.length === 0) return 1;
-  const uniqueDays = new Set(dailyEntries.map((d) => d.date));
-  const countDays = uniqueDays.size;
-  // e.g. 1-7 => week 1, 8-14 => week 2, etc.
-  const weekNum = Math.floor((countDays - 1) / 7) + 1;
-  return weekNum < 1 ? 1 : weekNum;
-}
 
 export default function WeeklySummaryPage() {
   // Instead of always defaulting to "1", we can do a "lazy" approach
@@ -160,7 +64,7 @@ export default function WeeklySummaryPage() {
     setWeekEnd(end);
 
     // 2) compute dynamic weekly score
-    const newScore = calculateWeekScore(weekNumber, allDaily);
+    const newScore = computeWeekScore(weekNumber, allDaily);
     setScore(newScore);
 
     // 3) see if there's an existing weekly summary in localStorage
@@ -343,7 +247,7 @@ export default function WeeklySummaryPage() {
                 </thead>
                 <tbody>
                   {allSummaries.map((ws) => {
-                    const dynamicScore = calculateWeekScore(
+                    const dynamicScore = computeWeekScore(
                       ws.weekNumber,
                       allDaily
                     );
