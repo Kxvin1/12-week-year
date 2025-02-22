@@ -316,7 +316,7 @@ export default function HomePage() {
                   type="file"
                   accept=".json"
                   onChange={handleFileChange}
-                  className="border p-1 rounded text-gray-800 w-64"
+                  className="border p-1 rounded text-gray-800 w-[250px]"
                 />
               </label>
             </div>
