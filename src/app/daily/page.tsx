@@ -191,9 +191,9 @@ export default function DailyPage() {
                   <thead>
                     <tr className="bg-gray-400 text-gray-800">
                       <th className="border p-2 w-1/4">Task Name</th>
+                      <th className="border p-2 w-[2.33%]">Edit Task Name</th>
                       <th className="border p-2 w-1/6">Tier (S/A/B/C)</th>
                       <th className="border p-2 w-1/2">Notes</th>
-                      <th className="border p-2 w-1/6">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -220,7 +220,40 @@ export default function DailyPage() {
                               <span>{task.taskId}</span>
                             )}
                           </td>
-
+                          {/* Actions Column (Edit/Delete) */}
+                          <td className="border p-2">
+                            {editingIndex === index ? (
+                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                <button
+                                  onClick={() => handleSaveTaskName(index)}
+                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="bg-gray-400 px-3 py-1 rounded hover:bg-gray-500 transition"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                <button
+                                  onClick={() => handleEditTask(index)}
+                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTask(index)}
+                                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </td>
                           {/* Tier Column */}
                           <td className="border p-2">
                             <div className="flex gap-2 justify-center">
@@ -257,41 +290,6 @@ export default function DailyPage() {
                                 handleNotesChange(index, e.target.value)
                               }
                             />
-                          </td>
-
-                          {/* Actions Column (Edit/Delete) */}
-                          <td className="border p-2">
-                            {editingIndex === index ? (
-                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                                <button
-                                  onClick={() => handleSaveTaskName(index)}
-                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  onClick={handleCancelEdit}
-                                  className="bg-gray-400 px-3 py-1 rounded hover:bg-gray-500 transition"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                                <button
-                                  onClick={() => handleEditTask(index)}
-                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteTask(index)}
-                                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            )}
                           </td>
                         </tr>
                       );
