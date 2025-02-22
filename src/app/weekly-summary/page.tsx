@@ -170,9 +170,11 @@ export default function WeeklySummaryPage() {
           </div>
 
           {showReflectionWarning && (
-            <p className="text-red-600 font-medium mb-4 text-center">
-              You have tasks this week but no reflection is saved! Add a
-              reflection to finalize this week.
+            <p className="text-red-600 font-bold mb-4 text-center">
+              You have tasks this week but no weekly summary is saved! Edit and
+              Save if you want to finalize this week. <br />
+              Clicking &apos;Cancel Editing&apos; preserves your entry but does
+              not save.
             </p>
           )}
 
@@ -180,7 +182,7 @@ export default function WeeklySummaryPage() {
             {reflectionEditMode ? (
               <>
                 <label className="font-semibold mb-2 block text-green-800">
-                  Reflection (Editing):
+                  Weekly Summary (Editing):
                 </label>
                 <textarea
                   className="border p-2 w-full rounded"
@@ -192,7 +194,7 @@ export default function WeeklySummaryPage() {
             ) : (
               <>
                 <label className="font-semibold mb-2 block text-gray-700">
-                  Reflection (Read-Only):
+                  Weekly Summary (Read-Only):
                 </label>
                 <div className="bg-gray-200 p-3 rounded min-h-[80px]">
                   {reflection
@@ -205,18 +207,26 @@ export default function WeeklySummaryPage() {
 
           <div className="flex justify-center gap-4 mb-8">
             {reflectionEditMode ? (
-              <button
-                onClick={handleSave}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              >
-                Save Weekly Summary
-              </button>
+              <>
+                <button
+                  onClick={handleSave}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Save Weekly Summary
+                </button>
+                <button
+                  onClick={() => setReflectionEditMode(false)}
+                  className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+                >
+                  Cancel Editing
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => setReflectionEditMode(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
               >
-                Edit Reflection
+                Edit Weekly Summary
               </button>
             )}
           </div>
