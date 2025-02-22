@@ -186,115 +186,119 @@ export default function DailyPage() {
                 </button>
               </div>
 
-              <table className="w-full border-collapse mb-4">
-                <thead>
-                  <tr className="bg-gray-400 text-gray-800">
-                    <th className="border p-2 w-1/4">Task Name</th>
-                    <th className="border p-2 w-1/6">Tier (S/A/B/C)</th>
-                    <th className="border p-2 w-1/2">Notes</th>
-                    <th className="border p-2 w-1/6">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dailyEntry.tasks.map((task, index) => {
-                    const isSelected = (val: "S" | "A" | "B" | "C") =>
-                      task.tier === val;
-                    return (
-                      <tr
-                        key={index}
-                        className="text-center bg-gray-200 text-gray-800"
-                      >
-                        {/* Task Name Cell */}
-                        <td className="border p-2">
-                          {editingIndex === index ? (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                className="border rounded p-1 w-full"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                              />
-                            </div>
-                          ) : (
-                            <span>{task.taskId}</span>
-                          )}
-                        </td>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse mb-4">
+                  <thead>
+                    <tr className="bg-gray-400 text-gray-800">
+                      <th className="border p-2 w-1/4">Task Name</th>
+                      <th className="border p-2 w-1/6">Tier (S/A/B/C)</th>
+                      <th className="border p-2 w-1/2">Notes</th>
+                      <th className="border p-2 w-1/6">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dailyEntry.tasks.map((task, index) => {
+                      const isSelected = (val: "S" | "A" | "B" | "C") =>
+                        task.tier === val;
+                      return (
+                        <tr
+                          key={index}
+                          className="text-center bg-gray-200 text-gray-800"
+                        >
+                          {/* Task Name Cell */}
+                          <td className="border p-2">
+                            {editingIndex === index ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  className="border rounded p-1 w-full"
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                />
+                              </div>
+                            ) : (
+                              <span>{task.taskId}</span>
+                            )}
+                          </td>
 
-                        {/* Tier Column */}
-                        <td className="border p-2">
-                          <div className="flex gap-2 justify-center">
-                            {(["S", "A", "B", "C"] as const).map((tierVal) => {
-                              const colorClass = getTierColor(
-                                tierVal,
-                                isSelected(tierVal)
-                              );
-                              return (
+                          {/* Tier Column */}
+                          <td className="border p-2">
+                            <div className="flex gap-2 justify-center">
+                              {(["S", "A", "B", "C"] as const).map(
+                                (tierVal) => {
+                                  const colorClass = getTierColor(
+                                    tierVal,
+                                    isSelected(tierVal)
+                                  );
+                                  return (
+                                    <button
+                                      key={tierVal}
+                                      onClick={() =>
+                                        handleTierChange(index, tierVal)
+                                      }
+                                      className={`px-3 py-1 rounded-full text-sm font-semibold ${colorClass} transition-colors duration-200`}
+                                    >
+                                      {tierVal}
+                                    </button>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Notes Column */}
+                          <td className="border p-2">
+                            <textarea
+                              className="border rounded p-1 w-full"
+                              rows={3}
+                              value={task.notes}
+                              placeholder="Notes..."
+                              onChange={(e) =>
+                                handleNotesChange(index, e.target.value)
+                              }
+                            />
+                          </td>
+
+                          {/* Actions Column (Edit/Delete) */}
+                          <td className="border p-2">
+                            {editingIndex === index ? (
+                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                                 <button
-                                  key={tierVal}
-                                  onClick={() =>
-                                    handleTierChange(index, tierVal)
-                                  }
-                                  className={`px-3 py-1 rounded-full text-sm font-semibold ${colorClass} transition-colors duration-200`}
+                                  onClick={() => handleSaveTaskName(index)}
+                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
                                 >
-                                  {tierVal}
+                                  Save
                                 </button>
-                              );
-                            })}
-                          </div>
-                        </td>
-
-                        {/* Notes Column */}
-                        <td className="border p-2">
-                          <textarea
-                            className="border rounded p-1 w-full"
-                            rows={3}
-                            value={task.notes}
-                            placeholder="Notes..."
-                            onChange={(e) =>
-                              handleNotesChange(index, e.target.value)
-                            }
-                          />
-                        </td>
-
-                        {/* Actions Column (Edit/Delete) */}
-                        <td className="border p-2">
-                          {editingIndex === index ? (
-                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                              <button
-                                onClick={() => handleSaveTaskName(index)}
-                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={handleCancelEdit}
-                                className="bg-gray-400 px-3 py-1 rounded hover:bg-gray-500 transition"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                              <button
-                                onClick={() => handleEditTask(index)}
-                                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTask(index)}
-                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="bg-gray-400 px-3 py-1 rounded hover:bg-gray-500 transition"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                                <button
+                                  onClick={() => handleEditTask(index)}
+                                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTask(index)}
+                                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
               <div className="flex justify-center">
                 <button
