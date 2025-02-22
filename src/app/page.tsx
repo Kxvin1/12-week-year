@@ -308,15 +308,15 @@ export default function HomePage() {
                 onClick={exportData}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
               >
-                Export Data
+                Click To Export
               </button>
               <label className="flex items-center gap-2 text-gray-700">
-                Import File:
+                Import:
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleFileChange}
-                  className="border p-1 rounded text-gray-800 w-[250px]"
+                  className="border rounded text-gray-800 w-[220px]"
                 />
               </label>
             </div>
