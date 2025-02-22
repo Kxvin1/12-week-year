@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       {/* Body uses the global background/text color from globals.css */}
       <body className="bg-[var(--background)] text-[var(--foreground)] min-h-screen flex flex-col">
         <header className="bg-gray-800 text-white px-6 py-3 flex items-center justify-center fixed top-0 w-full z-50">
-          <nav className="flex gap-4">
+          <nav className="flex flex-wrap justify-center gap-4">
             <Link href="/" className="hover:underline">
               Home
             </Link>
