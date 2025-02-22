@@ -171,6 +171,12 @@ export default function DailyPage() {
                   className="border p-2 mr-2 w-10/12 rounded text-gray-800"
                   value={newTaskName}
                   onChange={(e) => setNewTaskName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddTask();
+                    }
+                  }}
                 />
                 <button
                   onClick={handleAddTask}
