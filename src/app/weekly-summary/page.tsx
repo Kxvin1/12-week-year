@@ -171,8 +171,8 @@ export default function WeeklySummaryPage() {
 
           {showReflectionWarning && (
             <p className="text-red-600 font-bold mb-4 text-center">
-              You have tasks this week but no weekly summary is saved! Edit and
-              Save if you want to finalize this week. <br />
+              You have tasks this week but no weekly summary is saved! Save if
+              you want to finalize this week. <br />
               Clicking &apos;Cancel Editing&apos; preserves your entry but does
               not save.
             </p>

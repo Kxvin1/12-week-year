@@ -300,10 +300,10 @@ export default function HomePage() {
 
           {/* Import/Export + CLEAR DATA */}
           <section className="pt-4">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            <h2 className="flex justify-center text-2xl font-semibold text-gray-800 mb-2">
               Import / Export - JSON Only
             </h2>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col justify-center sm:flex-row gap-4">
               <button
                 onClick={exportData}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -316,16 +316,15 @@ export default function HomePage() {
                   type="file"
                   accept=".json"
                   onChange={handleFileChange}
-                  className="border p-1 rounded text-gray-800"
+                  className="border p-1 rounded text-gray-800 w-64"
                 />
               </label>
             </div>
 
-            <h2 className="text-sm font-semibold text-red-600 mb-2 mt-8">
+            <h2 className="text-center text-sm font-semibold text-red-600 mb-2 mt-8">
               <strong>NOTE:</strong> This data is saved on your browser&apos;s
               local storage.
-              <br />
-              Your data will persist as long as you don&apos;t clear your
+              <br /> Your data will persist as long as you don&apos;t clear your
               browser data.
             </h2>
 
